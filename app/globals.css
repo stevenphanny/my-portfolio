@@ -1,26 +1,66 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* For source of colours:
+1. https://au.pinterest.com/pin/4996249583083592/
+2. https://au.pinterest.com/pin/20618110790258218/
+3. https://au.pinterest.com/pin/68468856831132969/
+4. https://au.pinterest.com/pin/774124930856617/
+*/
+/* Colour palette + font tokens */
+@theme {
+  /* Navy */
+  --color-navy: #002147;
+
+  /* Tan */
+  --color-tan: #d2b48c;
+
+  /* Cream */
+  --color-cream: #fcedd3;
+
+  /* Not true black - same black as MAC */
+  --color-black: #333333;
+
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Fonts */
+.font-lora {
+  font-family: var(--font-lora);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.font-poppins {
+  font-family: var(--font-poppins);
+}
+
+.font-ballet {
+  font-family: var(--font-ballet);
+}
+
+.font-instrument-serif {
+  font-family: var(--font-instrument-serif);
+}
+/* Custom scrollbar */
+html {
+  scrollbar-width: auto;
+  scrollbar-color: var(--color-navy) var(--color-cream) ; /* (1)thumb (2)track */
+}
+
+/* Custom highlight */
+::selection {
+  background-color: var(--color-cream);
+  color: var(--color-navy);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-navy);
+  color: var(--color-cream);
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
+
+/* TODO for later */
+@media (prefers-reduced-motion: reduce) {
+}
+
+
+
