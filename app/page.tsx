@@ -1,9 +1,24 @@
-// Temp page
+import { Navbar } from "@/components/Navbar";
+import { SECTION_REGISTRY } from "@/components/sections/registry";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold mb-4">Temp Page</h1>
-      <p className="text-lg text-gray-600">This is a temporary placeholder page.</p>
+    <main className="relative min-h-screen bg-slate-900 text-slate-50">
+      <Navbar
+        sections={SECTION_REGISTRY.map(({ id, label }) => ({ id, label }))}
+      />
+
+      <div className="flex flex-col">
+        {SECTION_REGISTRY.map(({ id, bgClass, Component }) => (
+          <section
+            key={id}
+            id={id}
+            className={`min-h-screen flex items-center justify-center px-6 py-24 ${bgClass ?? ""}`}
+          >
+            <Component />
+          </section>
+        ))}
+      </div>
     </main>
   );
 }
