@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useLenis } from "@/components/LenisProvider";
 
 type NavSection = {
   id: string;
@@ -12,12 +12,11 @@ type NavbarProps = {
 };
 
 export function Navbar({ sections }: NavbarProps) {
-  // Helper function to 
+  // Lenis smooth-scroll: navbar links scroll to section by id instead of native scrollIntoView
+  const { scrollTo } = useLenis();
+
   const handleScrollTo = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    scrollTo(`#${id}`); // target matches <section id="…"> in page.tsx
   };
 
   return (
