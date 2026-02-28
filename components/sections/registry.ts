@@ -7,12 +7,16 @@ import { SkillsSection } from "@/components/sections/SkillsSection";
 import { WorkSection } from "@/components/sections/WorkSection";
 
 export type SectionProps = {
-  id: string;
-  label: string;
-  bgClass?: string;
-  Component: ComponentType;
+  id: string;       // used for scroll target (navbar) and <section id="…">; keep unique
+  label: string;   // text shown in the navbar for this section
+  bgClass?: string; // Tailwind class for section background (e.g. "bg-navy", "bg-cream")
+  Component: ComponentType; // the React component rendered inside the section
 };
 
+/**
+ * Single source of truth for the one-page layout: order here = navbar order and section order.
+ * Edit this array to reorder sections, add new ones, or change labels/backgrounds.
+ */
 export const SECTION_REGISTRY: SectionProps[] = [
   {
     id: "intro",
