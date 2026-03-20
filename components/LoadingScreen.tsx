@@ -94,8 +94,8 @@ export default function LoadingScreen() {
                   {svgData.paths.map((d, i) => {
                     const n = svgData.paths.length;
                     const stagger = n > 1 ? i / (n - 1) : 0;
-                    const pathDelay = WRITE_DELAY + stagger * WRITE_DURATION * 0.65;
-                    const drawDuration = WRITE_DURATION * 0.55;
+                    const pathDelay = WRITE_DELAY + stagger * WRITE_DURATION * 0.7;
+                    const drawDuration = WRITE_DURATION * 0.65;
                     return (
                       <motion.path
                         key={i}
@@ -111,11 +111,12 @@ export default function LoadingScreen() {
                           pathLength: {
                             delay: pathDelay,
                             duration: drawDuration,
-                            ease: [0.4, 0, 0.2, 1],
+                            ease: [0.37, 0, 0.63, 1],
                           },
                           fillOpacity: {
-                            delay: pathDelay + drawDuration * 0.55,
-                            duration: drawDuration * 0.5,
+                            delay: pathDelay + drawDuration * 0.3,
+                            duration: drawDuration * 0.8,
+                            ease: "easeOut",
                           },
                         }}
                       />
