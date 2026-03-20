@@ -3,6 +3,7 @@ import { Poppins, Ballet, Instrument_Serif, Lora} from "next/font/google";
 
 import "./globals.css";
 import { LenisProvider } from "@/components/LenisProvider";
+import LoadingScreen from "@/components/LoadingScreen";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -46,6 +47,7 @@ export default function RootLayout({
       <body
         className={`${lora.variable} ${poppins.variable} ${ballet.variable} ${instrumentSerif.className} tracking-wider antialiased`}
       >
+      <LoadingScreen />
       <LenisProvider>
         {children}
       </LenisProvider>
