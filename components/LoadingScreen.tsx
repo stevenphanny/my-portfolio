@@ -8,6 +8,22 @@ const FONT_SIZE = 200;
 const WRITE_DELAY = 0.3;    // seconds before the first stroke begins
 const WRITE_DURATION = 1.0; // seconds over which all strokes are staggered
 
+// Controls how dramatic the speed dip is in the middle of each stroke:
+//   2 = subtle breath,  3 = noticeable pause,  4 = very pronounced
+const EASE_POWER = 3;
+
+// Custom easeInOut easing built as two mirrored polynomial halves:
+//   first half:  easeIn  (starts slow, accelerates to the midpoint)
+//   second half: easeOut (decelerates from the midpoint, settles slow)
+// Higher EASE_POWER = more time spent at the slow ends, sharper peak in the middle.
+// This feels like a pen that carefully starts a stroke, flows confidently
+// through the middle, then gently lifts off at the end.
+const easeInOut = (t: number): number => {
+  return t < 0.5
+    ? Math.pow(2 * t, EASE_POWER) / 2
+    : 1 - Math.pow(2 * (1 - t), EASE_POWER) / 2;
+};
+
 interface SvgData {
   paths: string[]; // one SVG path `d` string per glyph
   viewBox: string;
@@ -114,14 +130,14 @@ export default function LoadingScreen() {
                     // Each stroke takes the full WRITE_DURATION to complete,
                     // meaning neighbouring glyphs overlap heavily — this is what
                     // creates the continuous, flowing feel instead of a stop-start one
-                    const drawDuration = WRITE_DURATION * 4;
+                    const drawDuration = WRITE_DURATION * 3;
 
                     return (
                       <motion.path
                         key={i}
                         d={d}
                         stroke="#fcedd3"
-                        strokeWidth={0.9}
+                        strokeWidth={0.8}
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         fill="#fcedd3"
@@ -131,9 +147,8 @@ export default function LoadingScreen() {
                           pathLength: {
                             delay: pathDelay,
                             duration: drawDuration,
-                            // Symmetric easeInOut — stroke accelerates in, decelerates out,
-                            // like a pen lifting off the page at the end of each stroke
-                            ease: [0.37, 0, 0.63, 1],
+                            // slow → fast → slow: see easeInOut above
+                            ease: easeInOut,
                           },
                           fillOpacity: {
                             // Fill begins fading in when the stroke is ~30% complete
@@ -155,7 +170,7 @@ export default function LoadingScreen() {
               className="font-poppins text-cream/50 text-xs tracking-[0.35em] uppercase"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: afterWrite + 0.25, duration: 0.8 }}
+              transition={{ delay: afterWrite + 2, duration: 0.8 }}
             >
               @stevenphanny
             </motion.p>
@@ -167,7 +182,7 @@ export default function LoadingScreen() {
                 initial={{ x: "-100%" }}
                 animate={{ x: "0%" }}
                 transition={{
-                  delay: afterWrite + 0.45,
+                  delay: afterWrite + 2,
                   duration: 1.4,
                   ease: [0.25, 1, 0.5, 1],
                 }}
