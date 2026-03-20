@@ -75,7 +75,7 @@ export default function LoadingScreen() {
     initFont();
 
     // Hide the loading screen after all animations have finished
-    const timer = setTimeout(() => setIsVisible(false), 5000);
+    const timer = setTimeout(() => setIsVisible(false), 5500);
     return () => {
       cancelled = true;
       clearTimeout(timer);
