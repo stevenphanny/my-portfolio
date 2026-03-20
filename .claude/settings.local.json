@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/CODING/**)",
+      "Read(//c/CODING/MAC/**)",
+      "Bash(find /c/CODING/MAC/my-portfolio/app -type f -name *.tsx -o -name *.ts -o -name *.css)",
+      "Bash(find /c/CODING/MAC/my-portfolio/components -type f -name *.tsx -o -name *.ts -o -name *.css)"
+    ]
+  }
+}
