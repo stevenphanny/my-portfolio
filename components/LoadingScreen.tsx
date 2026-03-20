@@ -151,10 +151,23 @@ export default function LoadingScreen() {
                             ease: easeInOut,
                           },
                           fillOpacity: {
-                            // Fill begins fading in when the stroke is ~30% complete
-                            // and takes 80% of the draw time, so ink seeps in gradually
-                            delay: pathDelay + drawDuration * 0.75,
-                            duration: drawDuration * 0.75,
+                            // delay  — when the fill starts, relative to this glyph's stroke.
+                            //   pathDelay        : anchors to this glyph's own stroke start
+                            //   + drawDuration*X : push X% into the stroke before fill begins
+                            //   lower X → fill starts sooner (less outline-first feel)
+                            //   higher X → fill starts later (more outline-first feel)
+                            //
+                            // duration — how long the fade from transparent → opaque takes.
+                            //   lower  → fill snaps in quickly
+                            //   higher → fill bleeds in gradually
+                            //
+                            // Constraint: if (delay offset + duration) > 1.0, the fill won't
+                            // finish before the stroke does — color still fading as outline completes.
+                            //
+                            //   0% ─────── stroke drawing ──────────────────── 100%
+                            //                  40% ── fill fading in ── 80%
+                            delay: pathDelay + drawDuration * 0.4,
+                            duration: drawDuration * 0.3,
                             ease: "easeOut",
                           },
                         }}
