@@ -3,12 +3,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
+// Tune these to control the overall writing speed and feel
 const FONT_SIZE = 200;
-const WRITE_DELAY = 0.3;
-const WRITE_DURATION = 2.0;
+const WRITE_DELAY = 0.3;    // seconds before the first stroke begins
+const WRITE_DURATION = 1.0; // seconds over which all strokes are staggered
 
 interface SvgData {
-  paths: string[];
+  paths: string[]; // one SVG path `d` string per glyph
   viewBox: string;
 }
 
@@ -18,16 +19,21 @@ export default function LoadingScreen() {
   const [fontError, setFontError] = useState(false);
 
   useEffect(() => {
+    // Guard against state updates after unmount
     let cancelled = false;
 
     async function initFont() {
       try {
+        // Dynamically import opentype.js so it doesn't bloat the initial bundle
         const { default: opentype } = await import("opentype.js");
         const font = await opentype.load("/fonts/Ballet-Regular.ttf");
         if (cancelled) return;
 
+        // Convert each character of the name into an SVG path object
         const paths = font.getPaths("Steven Phan", 0, FONT_SIZE, FONT_SIZE);
 
+        // Compute the tight bounding box across all non-empty glyphs
+        // so the SVG viewBox fits the text exactly (plus padding)
         let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
         for (const p of paths) {
           const bb = p.getBoundingBox();
@@ -45,19 +51,22 @@ export default function LoadingScreen() {
           viewBox: `${x1 - PAD} ${y1 - PAD} ${x2 - x1 + PAD * 2} ${y2 - y1 + PAD * 2}`,
         });
       } catch {
+        // If the font fails to load, fall back to a plain CSS text element
         if (!cancelled) setFontError(true);
       }
     }
 
     initFont();
 
-    const timer = setTimeout(() => setIsVisible(false), 4600);
+    // Hide the loading screen after all animations have finished
+    const timer = setTimeout(() => setIsVisible(false), 5000);
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
   }, []);
 
+  // Point in time when writing finishes — used to delay the handle and loading bar
   const afterWrite = WRITE_DELAY + WRITE_DURATION;
 
   return (
@@ -70,7 +79,7 @@ export default function LoadingScreen() {
         >
           <div className="flex flex-col items-center gap-3 select-none">
 
-            {/* Fallback if font fetch fails */}
+            {/* Fallback if the font file fails to load — simple fade-up */}
             {fontError && (
               <motion.h1
                 className="font-ballet text-cream text-6xl sm:text-7xl md:text-8xl leading-none"
@@ -82,7 +91,7 @@ export default function LoadingScreen() {
               </motion.h1>
             )}
 
-            {/* SVG writing animation — pathLength traces each glyph stroke by stroke */}
+            {/* SVG writing animation — each glyph path is drawn via pathLength */}
             {svgData && (
               <div className="w-[min(82vw,580px)]">
                 <svg
@@ -93,15 +102,26 @@ export default function LoadingScreen() {
                 >
                   {svgData.paths.map((d, i) => {
                     const n = svgData.paths.length;
+
+                    // Normalised position of this glyph in the sequence (0 → 1)
                     const stagger = n > 1 ? i / (n - 1) : 0;
+
+                    // Each glyph's stroke starts slightly later than the previous,
+                    // spread across 70% of WRITE_DURATION so the last glyph
+                    // still has plenty of time to finish drawing
                     const pathDelay = WRITE_DELAY + stagger * WRITE_DURATION * 0.7;
-                    const drawDuration = WRITE_DURATION * 0.65;
+
+                    // Each stroke takes the full WRITE_DURATION to complete,
+                    // meaning neighbouring glyphs overlap heavily — this is what
+                    // creates the continuous, flowing feel instead of a stop-start one
+                    const drawDuration = WRITE_DURATION * 4;
+
                     return (
                       <motion.path
                         key={i}
                         d={d}
                         stroke="#fcedd3"
-                        strokeWidth={0.8}
+                        strokeWidth={0.9}
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         fill="#fcedd3"
@@ -111,9 +131,13 @@ export default function LoadingScreen() {
                           pathLength: {
                             delay: pathDelay,
                             duration: drawDuration,
+                            // Symmetric easeInOut — stroke accelerates in, decelerates out,
+                            // like a pen lifting off the page at the end of each stroke
                             ease: [0.37, 0, 0.63, 1],
                           },
                           fillOpacity: {
+                            // Fill begins fading in when the stroke is ~30% complete
+                            // and takes 80% of the draw time, so ink seeps in gradually
                             delay: pathDelay + drawDuration * 0.3,
                             duration: drawDuration * 0.8,
                             ease: "easeOut",
@@ -126,7 +150,7 @@ export default function LoadingScreen() {
               </div>
             )}
 
-            {/* Handle */}
+            {/* Social handle — fades in once writing is done */}
             <motion.p
               className="font-poppins text-cream/50 text-xs tracking-[0.35em] uppercase"
               initial={{ opacity: 0 }}
@@ -136,7 +160,7 @@ export default function LoadingScreen() {
               @stevenphanny
             </motion.p>
 
-            {/* Loading bar */}
+            {/* Loading bar — slides in after the handle */}
             <div className="mt-6 w-32 h-px bg-cream/15 relative overflow-hidden">
               <motion.div
                 className="absolute inset-0 bg-cream/80"
