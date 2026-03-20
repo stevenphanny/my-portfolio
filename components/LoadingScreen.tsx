@@ -141,7 +141,7 @@ export default function LoadingScreen() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         fill="#fcedd3"
-                        initial={{ pathLength: 0, fillOpacity: 0 }}
+                        initial={{ pathLength: 0, fillOpacity: 0}}
                         animate={{ pathLength: 1, fillOpacity: 1 }}
                         transition={{
                           pathLength: {
@@ -153,8 +153,8 @@ export default function LoadingScreen() {
                           fillOpacity: {
                             // Fill begins fading in when the stroke is ~30% complete
                             // and takes 80% of the draw time, so ink seeps in gradually
-                            delay: pathDelay + drawDuration * 0.3,
-                            duration: drawDuration * 0.8,
+                            delay: pathDelay + drawDuration * 0.75,
+                            duration: drawDuration * 0.75,
                             ease: "easeOut",
                           },
                         }}
