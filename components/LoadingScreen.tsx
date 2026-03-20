@@ -38,6 +38,24 @@ export default function LoadingScreen() {
     // Guard against state updates after unmount
     let cancelled = false;
 
+    // Lock native scroll and block Lenis from accumulating wheel input while
+    // the overlay is visible. Without this, users can scroll the page beneath
+    // the loading screen and end up mid-page when it disappears.
+    document.documentElement.style.overflow = 'hidden';
+
+    // Intercept in capture phase so events never reach Lenis's bubble-phase
+    // window listener, preventing its internal targetScroll from advancing.
+    function blockScroll(e: Event) { e.stopPropagation(); }
+    window.addEventListener('wheel', blockScroll, { capture: true });
+    window.addEventListener('touchmove', blockScroll, { capture: true });
+
+    function releaseScroll() {
+      window.scrollTo(0, 0); // snap to top before the overlay fades out
+      document.documentElement.style.overflow = '';
+      window.removeEventListener('wheel', blockScroll, { capture: true });
+      window.removeEventListener('touchmove', blockScroll, { capture: true });
+    }
+
     async function initFont() {
       try {
         // Dynamically import opentype.js so it doesn't bloat the initial bundle
@@ -75,10 +93,14 @@ export default function LoadingScreen() {
     initFont();
 
     // Hide the loading screen after all animations have finished
-    const timer = setTimeout(() => setIsVisible(false), 5000);
+    const timer = setTimeout(() => {
+      releaseScroll();
+      setIsVisible(false);
+    }, 5000);
     return () => {
       cancelled = true;
       clearTimeout(timer);
+      releaseScroll(); // safety net if the component ever unmounts early
     };
   }, []);
 

@@ -39,13 +39,13 @@ export const SECTION_REGISTRY: SectionProps[] = [
   {
     id: "skills",
     label: "Skills",
-    bgClass: "bg-tan",
+    bgClass: "bg-cream",
     Component: SkillsSection,
   },
   {
     id: "contact",
     label: "Contact",
-    bgClass: "bg-cream",
+    bgClass: "bg-tan",
     Component: ContactSection,
   },
 ];
