@@ -4,6 +4,7 @@ import { Poppins, Ballet, Instrument_Serif, Lora} from "next/font/google";
 import "./globals.css";
 import { LenisProvider } from "@/components/LenisProvider";
 import LoadingScreen from "@/components/LoadingScreen";
+import StripeScrollIndicator from "@/components/StripeScrollIndicator";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -49,6 +50,7 @@ export default function RootLayout({
       >
       <LoadingScreen />
       <LenisProvider>
+        <StripeScrollIndicator />
         {children}
       </LenisProvider>
       <Analytics />

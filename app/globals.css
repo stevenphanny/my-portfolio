@@ -58,6 +58,12 @@ body {
   height: 100%;
 }
 
+/* Prevent browser autofill from painting over cream-background inputs */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #fcedd3 inset;
+  -webkit-text-fill-color: #002147;
+}
+
 /* TODO for later */
 @media (prefers-reduced-motion: reduce) {
 }
