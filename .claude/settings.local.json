@@ -6,7 +6,11 @@
       "Bash(npm run:*)",
       "Read(//c/CODING/**)",
       "Bash(find /c/CODING/MAC/my-portfolio/app -type f -name *.tsx -o -name *.ts -o -name *.css)",
-      "Bash(find /c/CODING/MAC/my-portfolio/components -type f -name *.tsx -o -name *.ts -o -name *.css)"
+      "Bash(find /c/CODING/MAC/my-portfolio/components -type f -name *.tsx -o -name *.ts -o -name *.css)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_take_screenshot"
     ]
   }
 }

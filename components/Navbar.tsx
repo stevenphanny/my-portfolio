@@ -93,12 +93,12 @@ export function Navbar({ sections }: NavbarProps) {
       </div>
 
       {/* ----- Medium to large screens: fixed navbar ----- */}
-      <header className="fixed right-0 left-0 top-0 z-50 border-color-white border-2 bg-cream backdrop-blur-xs">
+      <header className="fixed right-0 left-0 top-0 z-50">
         <div className="mx-auto flex max-w items-center justify-between p-5">
           <button
             type="button"
             onClick={() => handleScrollTo("intro")}
-            className="cursor-pointer font-instrument-serif text-xl tracking-wide text-navy"
+            className="cursor-pointer font-instrument-serif text-xl tracking-wide text-cream"
           >
             Stevenphanny
           </button>
@@ -110,7 +110,7 @@ export function Navbar({ sections }: NavbarProps) {
                   <button
                     type="button"
                     onClick={() => handleScrollTo(section.id)}
-                    className="cursor-pointer rounded-sm px-3 py-1.5 font-poppins text-navy transition-colors duration-300 hover:bg-navy hover:text-cream"
+                    className="cursor-pointer px-3 py-1.5 font-poppins text-cream transition-colors duration-300 hover:text-cream/60"
                   >
                     {section.label}
                   </button>
