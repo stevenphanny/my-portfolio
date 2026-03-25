@@ -32,7 +32,7 @@ export default function StripeScrollIndicator() {
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed left-0 top-0 h-screen w-1 hidden md:block z-40 pointer-events-none"
+          className="fixed right-0 top-0 h-screen w-1 hidden md:block z-40 pointer-events-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -71,7 +71,7 @@ export default function StripeScrollIndicator() {
                     transition={{ duration: 0.2 }}
                   />
                   {/* Section label — appears on hover */}
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-poppins text-[9px] tracking-widest uppercase text-cream/70 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 select-none">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 font-poppins text-[9px] tracking-widest uppercase text-cream/70 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 select-none">
                     {section.label}
                   </span>
                 </div>

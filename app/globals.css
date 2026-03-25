@@ -38,10 +38,17 @@
 .font-instrument-serif {
   font-family: var(--font-instrument-serif);
 }
-/* Custom scrollbar */
-html {
-  scrollbar-width: auto;
-  scrollbar-color: var(--color-navy) var(--color-cream) ; /* (1)thumb (2)track */
+/* Hide native scrollbar — replaced by StripeScrollIndicator on the right */
+html,
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge legacy */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  display: none; /* Chrome, Safari, Edge */
 }
 
 /* Custom highlight */

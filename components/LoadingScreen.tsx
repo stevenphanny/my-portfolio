@@ -38,22 +38,22 @@ export default function LoadingScreen() {
     // Guard against state updates after unmount
     let cancelled = false;
 
-    // Lock native scroll and block Lenis from accumulating wheel input while
-    // the overlay is visible. Without this, users can scroll the page beneath
-    // the loading screen and end up mid-page when it disappears.
-    document.documentElement.style.overflow = 'hidden';
-
-    // Intercept in capture phase so events never reach Lenis's bubble-phase
-    // window listener, preventing its internal targetScroll from advancing.
-    function blockScroll(e: Event) { e.stopPropagation(); }
-    window.addEventListener('wheel', blockScroll, { capture: true });
-    window.addEventListener('touchmove', blockScroll, { capture: true });
+    // Block scroll without touching overflow — overflow:hidden removes the
+    // scrollbar, causing a ~15px layout shift when it reappears after exit.
+    // Instead, preventDefault stops native scroll; stopPropagation stops Lenis.
+    // passive:false is required for preventDefault to work on wheel/touchmove.
+    const SCROLL_KEYS = new Set(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','PageUp','PageDown','Home','End']);
+    function blockWheel(e: Event) { e.stopPropagation(); e.preventDefault(); }
+    function blockKey(e: KeyboardEvent) { if (SCROLL_KEYS.has(e.code)) e.preventDefault(); }
+    window.addEventListener('wheel',     blockWheel, { capture: true, passive: false });
+    window.addEventListener('touchmove', blockWheel, { capture: true, passive: false });
+    window.addEventListener('keydown',   blockKey,   { capture: true });
 
     function releaseScroll() {
-      window.scrollTo(0, 0); // snap to top before the overlay fades out
-      document.documentElement.style.overflow = '';
-      window.removeEventListener('wheel', blockScroll, { capture: true });
-      window.removeEventListener('touchmove', blockScroll, { capture: true });
+      window.scrollTo(0, 0);
+      window.removeEventListener('wheel',     blockWheel, { capture: true });
+      window.removeEventListener('touchmove', blockWheel, { capture: true });
+      window.removeEventListener('keydown',   blockKey,   { capture: true });
     }
 
     async function initFont() {

@@ -249,7 +249,6 @@ export function ContactSection() {
           Let&apos;s work
           <br />
           together.
-          TODO: Make the contact form cooler almost like a letter being opened or smt
         </h2>
       </motion.div>
 
