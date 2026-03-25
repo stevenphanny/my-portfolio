@@ -46,3 +46,36 @@ Four Google Fonts are loaded in `layout.tsx` and exposed as CSS variables:
 | `black` | `#333333` | Soft black (matches MAC brand) |
 
 Use these as `bg-navy`, `text-cream`, etc. in Tailwind classes.
+
+## Design Philosophy
+
+> Sophisticated yet special. Editorial typography, purposeful motion, dark navy / warm cream palette. Every animation earns its place.
+
+### Typography hierarchy
+
+| Role | Font | Tailwind class |
+|------|------|----------------|
+| Display / hero names | Instrument Serif | `font-instrument-serif` |
+| Pull-quotes, body text | Lora | `font-lora` |
+| UI labels, nav, tags, eyebrows | Poppins | `font-poppins` |
+
+- Eyebrow labels: Poppins, `text-xs tracking-[0.3em] uppercase opacity-50`
+- Section headings: Instrument Serif, `text-5xl md:text-7xl`
+- Body: Lora, `text-base leading-relaxed`
+
+### Animation principles
+
+- **Headings**: clip-reveal upward — `clipPath: "inset(0 0 100% 0)"` → `"inset(0 0 0% 0)"` (wrap text in overflow-hidden container)
+- **Body / cards**: fade + slide up — `opacity: 0, y: 40` → `opacity: 1, y: 0`
+- **Lists / tags**: stagger via Framer Motion `staggerChildren`
+- **Dividers**: wipe from left — `scaleX: 0 → 1` with `style={{ originX: 0 }}`
+- **Scroll triggers**: `whileInView` with `viewport={{ once: true, margin: "-60px" }}`
+- Standard easing: `[0.25, 0, 0, 1]` (smooth ease-out)
+- Spring/overshoot easing: `[0.16, 1, 0.3, 1]` (for navbar / entrance moments)
+- Intro section animations: delay to `NAV_DELAY = 5.7` so they start after the loading screen exits
+
+### Interaction feel
+
+- Hover on interactive elements: subtle scale (`scale(1.02–1.05)`) + colour swap
+- Image blocks: `overflow-hidden` with inner `scale(1.03)` on hover for parallax feel
+- Transitions: `duration-300` for hover states, `duration-[600ms]` for entrance animations
