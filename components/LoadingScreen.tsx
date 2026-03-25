@@ -92,11 +92,12 @@ export default function LoadingScreen() {
 
     initFont();
 
-    // Hide the loading screen after all animations have finished
+    // Hide the loading screen when the cream wipe has fully covered it
+    // (cream wipe starts at 5.3s, enters over 0.54s → fully in at ~5.84s)
     const timer = setTimeout(() => {
       releaseScroll();
       setIsVisible(false);
-    }, 5000);
+    }, 5840);
     return () => {
       cancelled = true;
       clearTimeout(timer);
@@ -112,8 +113,6 @@ export default function LoadingScreen() {
       {isVisible && (
         <motion.div
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-navy overflow-hidden"
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: "easeInOut" }}
         >
           <div className="flex flex-col items-center gap-3 select-none">
 
