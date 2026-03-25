@@ -68,10 +68,10 @@ export function IntroSection() {
   return (
     <div className="w-full flex flex-col items-center gap-0 text-center relative">
 
-      {/* Cream wipe: sweeps in left→right, then exits left→right */}
+      {/* Cream wipe: sweeps in left→right over the loading screen, then exits left→right */}
       <motion.div
         aria-hidden
-        className="fixed inset-0 z-[55] bg-cream pointer-events-none"
+        className="fixed inset-0 z-[10000] bg-cream pointer-events-none"
         initial={{ clipPath: "inset(0 100% 0 0)" }}
         animate={{ clipPath: ["inset(0 100% 0 0)", "inset(0 0% 0 0)", "inset(0 0% 0 100%)"] }}
         transition={{ delay: HERO_DELAY - 0.4, duration: 1.2, times: [0, 0.45, 1], ease: "easeInOut" }}
