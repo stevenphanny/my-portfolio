@@ -10,6 +10,7 @@ export type SectionProps = {
   id: string;       // used for scroll target (navbar) and <section id="…">; keep unique
   label: string;   // text shown in the navbar for this section
   bgClass?: string; // Tailwind class for section background (e.g. "bg-navy", "bg-cream")
+  navColor: "cream" | "navy"; // navbar text colour when this section is under the nav bar
   Component: ComponentType; // the React component rendered inside the section
 };
 
@@ -22,30 +23,35 @@ export const SECTION_REGISTRY: SectionProps[] = [
     id: "intro",
     label: "Intro",
     bgClass: "bg-navy",
+    navColor: "cream",
     Component: IntroSection,
   },
   {
     id: "work",
     label: "Work",
-    bgClass: "bg-navy",
+    bgClass: "bg-tan",
+    navColor: "navy",
     Component: WorkSection,
   },
   {
     id: "about",
     label: "About",
     bgClass: "bg-navy",
+    navColor: "cream",
     Component: AboutSection,
   },
-  {
-    id: "skills",
-    label: "Skills",
-    bgClass: "bg-cream",
-    Component: SkillsSection,
-  },
+  // {
+  //   id: "skills",
+  //   label: "Skills",
+  //   bgClass: "bg-tan",
+  //   navColor: "navy",
+  //   Component: SkillsSection,
+  // },
   {
     id: "contact",
     label: "Contact",
     bgClass: "bg-tan",
+    navColor: "navy",
     Component: ContactSection,
   },
 ];

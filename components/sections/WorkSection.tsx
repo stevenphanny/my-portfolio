@@ -86,6 +86,16 @@ export function WorkSection() {
   return (
     <div className="mx-auto w-full max-w-5xl px-6 md:px-12 py-4">
 
+      {/* Divider */}
+      <motion.div
+        initial={{ scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 1.1, ease: [0.25, 0, 0, 1] }}
+        style={{ originX: 0 }}
+        className="h-px max-w-full w-full bg-navy/15 mb-16"
+      />
+
       {/* Section heading */}
       <div className="overflow-hidden mb-16">
         <motion.h2
@@ -93,7 +103,7 @@ export function WorkSection() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
-          className="font-instrument-serif text-5xl md:text-7xl text-cream"
+          className="font-instrument-serif text-5xl md:text-7xl text-navy"
         >
           Work
         </motion.h2>
@@ -122,7 +132,7 @@ export function WorkSection() {
                   transition={{ duration: 0.45, ease: [0.25, 0, 0, 1] }}
                   className={`aspect-video w-full ${project.imgClass} rounded-xl flex items-end p-5`}
                 >
-                  <span className="font-poppins text-xs tracking-[0.2em] text-cream/20 uppercase">
+                  <span className="font-poppins text-xs tracking-[0.2em] text-navy/20 uppercase">
                     {project.id}
                   </span>
                 </motion.div>
@@ -130,11 +140,11 @@ export function WorkSection() {
 
               {/* Text */}
               <div className="flex flex-col justify-center gap-4">
-                <p className="font-poppins text-xs tracking-[0.3em] uppercase text-cream/30">
+                <p className="font-poppins text-xs tracking-[0.3em] uppercase text-navy/30">
                   {project.id}
                 </p>
 
-                <h3 className="font-instrument-serif text-3xl md:text-4xl text-cream leading-tight">
+                <h3 className="font-instrument-serif text-3xl md:text-4xl text-navy leading-tight">
                   {project.title}
                 </h3>
 
@@ -147,14 +157,14 @@ export function WorkSection() {
                 >
                   {project.tags.map((tag) => (
                     <motion.li key={tag} variants={tagVariants}>
-                      <span className="rounded-full border border-cream/15 px-3 py-1 font-poppins text-xs text-cream/50">
+                      <span className="rounded-full border border-navy/40 px-3 py-1 font-poppins text-xs text-navy/50">
                         {tag}
                       </span>
                     </motion.li>
                   ))}
                 </motion.ul>
 
-                <p className="font-lora text-sm text-cream/55 leading-relaxed">
+                <p className="font-lora text-sm text-navy/65 leading-relaxed">
                   {project.desc}
                 </p>
 
@@ -165,7 +175,7 @@ export function WorkSection() {
                       href={project.live}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group inline-flex items-center gap-1.5 font-poppins text-xs text-cream/60 transition-colors duration-200 hover:text-cream"
+                      className="group inline-flex items-center gap-1.5 font-poppins text-xs text-navy/60 transition-colors duration-200 hover:text-navy"
                     >
                       Live
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
@@ -178,7 +188,7 @@ export function WorkSection() {
                       href={project.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group inline-flex items-center gap-1.5 font-poppins text-xs text-cream/60 transition-colors duration-200 hover:text-cream"
+                      className="group inline-flex items-center gap-1.5 font-poppins text-xs text-navy/60 transition-colors duration-200 hover:text-navy"
                     >
                       GitHub
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
