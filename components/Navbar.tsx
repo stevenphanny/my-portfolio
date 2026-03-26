@@ -8,11 +8,6 @@ import { SECTION_REGISTRY } from "@/components/sections/registry";
 // Delay matches loading screen exit: 5s timer + 0.7s overlay fade
 const NAV_DELAY = 5.7;
 
-const logoVariants = {
-  hidden: { opacity: 0, y: -18 },
-  show:   { opacity: 1, y: 0, transition: { delay: NAV_DELAY, duration: 0.65, ease: [0.16, 1, 0.3, 1] as const } },
-};
-
 const listVariants = {
   hidden: {},
   show:   { transition: { delayChildren: NAV_DELAY + 0.12, staggerChildren: 0.11 } },
@@ -35,6 +30,16 @@ type NavbarProps = {
 export function Navbar({ sections }: NavbarProps) {
   const { scrollTo } = useLenis();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
+
+  useEffect(() => {
+    function updateLogo() {
+      setShowLogo(window.scrollY >= window.innerHeight * 0.6);
+    }
+    window.addEventListener("scroll", updateLogo, { passive: true });
+    updateLogo();
+    return () => window.removeEventListener("scroll", updateLogo);
+  }, []);
 
   // ── Colour-aware navbar ────────────────────────────────────────────────────
   // Tracks which section is currently under the navbar and switches colours.
@@ -63,6 +68,7 @@ export function Navbar({ sections }: NavbarProps) {
 
   // Derived colour classes — CSS transition-colors handles the smooth swap
   const fg        = scheme === "cream" ? "text-cream"                  : "text-navy";
+  const tanNavy = scheme === "cream" ? "text-tan" : "text-navy";
   const itemHover = scheme === "cream" ? "hover:bg-cream hover:text-navy" : "hover:bg-navy hover:text-cream";
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -122,17 +128,17 @@ export function Navbar({ sections }: NavbarProps) {
 
       {/* ----- Medium+ screens: fixed navbar ----- */}
       <header className="fixed right-0 left-0 top-0 z-50">
-        <div className="mx-auto flex max-w items-center justify-end p-5">
-          {/* <motion.button
+        <div className="mx-auto flex max-w items-center justify-between p-5">
+          <motion.button
             type="button"
             onClick={() => handleScrollTo("intro")}
-            className={`cursor-pointer font-instrument-serif text-xl tracking-wide transition-colors duration-[400ms] ${fg}`}
-            variants={logoVariants}
-            initial="hidden"
-            animate="show"
+            className={`cursor-pointer font-instrument-serif tracking-wide transition-colors duration-[400ms] pointer-events-auto ${tanNavy}`}
+            style={{ fontSize: "clamp(0.8rem, 2.6vw, 2.8rem)" }}
+            animate={{ opacity: showLogo ? 1 : 0, y: showLogo ? 0 : -8 }}
+            transition={{ duration: 0.5, ease: [0.25, 0, 0, 1] }}
           >
-            Stevenphanny
-          </motion.button> */}
+            <span>@stevenphanny</span>
+          </motion.button>
 
           <nav className="hidden md:block">
             <motion.ul
