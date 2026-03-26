@@ -128,11 +128,11 @@ export function Navbar({ sections }: NavbarProps) {
 
       {/* ----- Medium+ screens: fixed navbar ----- */}
       <header className="fixed right-0 left-0 top-0 z-50">
-        <div className="mx-auto flex max-w items-center justify-between p-5">
+        <div className="mx-auto flex max-w items-center justify-end p-5 relative">
           <motion.button
             type="button"
             onClick={() => handleScrollTo("intro")}
-            className={`cursor-pointer font-instrument-serif tracking-wide transition-colors duration-[400ms] pointer-events-auto ${tanNavy}`}
+            className={`absolute left-5 cursor-pointer font-instrument-serif tracking-wide transition-colors duration-[400ms] pointer-events-auto ${tanNavy}`}
             style={{ fontSize: "clamp(0.8rem, 2.6vw, 2.8rem)" }}
             animate={{ opacity: showLogo ? 1 : 0, y: showLogo ? 0 : -8 }}
             transition={{ duration: 0.5, ease: [0.25, 0, 0, 1] }}
