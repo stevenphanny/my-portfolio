@@ -8,11 +8,6 @@ import { SECTION_REGISTRY } from "@/components/sections/registry";
 // Delay matches loading screen exit: 5s timer + 0.7s overlay fade
 const NAV_DELAY = 5.7;
 
-const logoVariants = {
-  hidden: { opacity: 0, y: -18 },
-  show:   { opacity: 1, y: 0, transition: { delay: NAV_DELAY, duration: 0.65, ease: [0.16, 1, 0.3, 1] as const } },
-};
-
 const listVariants = {
   hidden: {},
   show:   { transition: { delayChildren: NAV_DELAY + 0.12, staggerChildren: 0.11 } },
@@ -35,25 +30,39 @@ type NavbarProps = {
 export function Navbar({ sections }: NavbarProps) {
   const { scrollTo } = useLenis();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
+
+  useEffect(() => {
+    function updateLogo() {
+      setShowLogo(window.scrollY >= window.innerHeight * 0.6);
+    }
+    window.addEventListener("scroll", updateLogo, { passive: true });
+    updateLogo();
+    return () => window.removeEventListener("scroll", updateLogo);
+  }, []);
 
   // ── Colour-aware navbar ────────────────────────────────────────────────────
   // Tracks which section is currently under the navbar and switches colours.
   const [scheme, setScheme] = useState<"cream" | "navy">("cream");
   const schemeRef = useRef<"cream" | "navy">("cream");
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   useEffect(() => {
     function update() {
-      let active: "cream" | "navy" = SECTION_REGISTRY[0].navColor;
+      let activeColor: "cream" | "navy" = SECTION_REGISTRY[0].navColor;
+      let activeId: string | null = null;
       for (const s of SECTION_REGISTRY) {
         const el = document.getElementById(s.id);
         if (el && el.getBoundingClientRect().top <= 60) {
-          active = s.navColor;
+          activeColor = s.navColor;
+          activeId = s.id;
         }
       }
-      if (active !== schemeRef.current) {
-        schemeRef.current = active;
-        setScheme(active);
+      if (activeColor !== schemeRef.current) {
+        schemeRef.current = activeColor;
+        setScheme(activeColor);
       }
+      setActiveSection(activeId);
     }
 
     window.addEventListener("scroll", update, { passive: true });
@@ -63,7 +72,9 @@ export function Navbar({ sections }: NavbarProps) {
 
   // Derived colour classes — CSS transition-colors handles the smooth swap
   const fg        = scheme === "cream" ? "text-cream"                  : "text-navy";
+  const tanNavy = scheme === "cream" ? "text-tan" : "text-navy";
   const itemHover = scheme === "cream" ? "hover:bg-cream hover:text-navy" : "hover:bg-navy hover:text-cream";
+  const itemActive = scheme === "cream" ? "bg-cream text-navy" : "bg-navy text-cream";
   // ──────────────────────────────────────────────────────────────────────────
 
   const handleScrollTo = (id: string) => scrollTo(`#${id}`);
@@ -122,17 +133,17 @@ export function Navbar({ sections }: NavbarProps) {
 
       {/* ----- Medium+ screens: fixed navbar ----- */}
       <header className="fixed right-0 left-0 top-0 z-50">
-        <div className="mx-auto flex max-w items-center justify-end p-5">
-          {/* <motion.button
+        <div className="mx-auto flex max-w items-center justify-end p-5 relative">
+          <motion.button
             type="button"
             onClick={() => handleScrollTo("intro")}
-            className={`cursor-pointer font-instrument-serif text-xl tracking-wide transition-colors duration-[400ms] ${fg}`}
-            variants={logoVariants}
-            initial="hidden"
-            animate="show"
+            className={`absolute left-5 cursor-pointer font-instrument-serif tracking-wide transition-colors duration-[600ms] pointer-events-auto ${tanNavy}`}
+            style={{ fontSize: "clamp(0.8rem, 2.6vw, 2.8rem)" }}
+            animate={{ opacity: showLogo ? 1 : 0, y: showLogo ? 0 : -8 }}
+            transition={{ duration: 0.5, ease: [0.25, 0, 0, 1] }}
           >
-            Stevenphanny
-          </motion.button> */}
+            <span>@stevenphanny</span>
+          </motion.button>
 
           <nav className="hidden md:block">
             <motion.ul
@@ -146,7 +157,7 @@ export function Navbar({ sections }: NavbarProps) {
                   <button
                     type="button"
                     onClick={() => handleScrollTo(section.id)}
-                    className={`cursor-pointer px-3 py-1.5 font-poppins rounded-sm transition-colors duration-[400ms] ${fg} ${itemHover}`}
+                    className={`cursor-pointer px-3 py-1.5 font-poppins rounded-sm transition-colors duration-[600ms] ${section.id === activeSection ? itemActive : `${fg} ${itemHover}`}`}
                   >
                     {section.label}
                   </button>

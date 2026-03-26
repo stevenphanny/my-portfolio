@@ -35,17 +35,15 @@ const makeFadeUp = (extraDelay: number) => ({
 });
 
 const row2Variants = makeFadeUp(0.3);
-const row3Variants = makeFadeUp(0.52);
 
 // ── IntroSection ───────────────────────────────────────────────────────────────
 export function IntroSection() {
   const { scrollY } = useScroll();
 
   // No useSpring — Lenis already smooths scroll, double-smoothing felt wrong
-  const row1X = useTransform(scrollY, [0, 600], [-10, 40]);
-  const row2X = useTransform(scrollY, [0, 600], [10, -30]);
+  const row1X = useTransform(scrollY, [0, 600], [-10, 60]);
+  const row2X = useTransform(scrollY, [0, 600], [10, -40]);
 
-  // Scroll indicator: show after hero delay, hide once user scrolls
   const [indicatorVisible, setIndicatorVisible] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
 
@@ -83,7 +81,7 @@ export function IntroSection() {
           variants={row1Variants}
           initial="hidden"
           animate="show"
-          className="font-instrument-serif text-cream leading-none tracking-tight"
+          className="font-instrument-serif text-cream leading-none tracking-tight mr-10"
           style={{ fontSize: "clamp(4rem, 13vw, 14rem)" }}
         >
           Steven Phan
@@ -93,7 +91,7 @@ export function IntroSection() {
       {/* ── Rows 2 & 3: move together ────────────────────────────────────── */}
       <motion.div
         style={{ x: row2X }}
-        className="flex flex-col items-center gap-1"
+      className="flex flex-col items-center gap-1 mr-10"
       >
         <motion.p
           variants={row2Variants}
@@ -102,39 +100,11 @@ export function IntroSection() {
           className="font-instrument-serif tracking-tight"
           style={{ fontSize: "clamp(0.8rem, 2.6vw, 2.8rem)" }}
         >
-          <span className="text-cream/30">@</span>
+          <span className="text-tan">@</span>
           <span className="text-tan">stevenphanny</span>
         </motion.p>
-
-        <motion.p
-          variants={row3Variants}
-          initial="hidden"
-          animate="show"
-          className="font-poppins text-sm text-cream/50 tracking-wide"
-        >
-          Software Engineer
-        </motion.p>
       </motion.div>
 
-      {/* Scroll indicator — fixed to viewport bottom, fades after loading + hides on scroll */}
-      <motion.div
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none z-30"
-        animate={{
-          opacity: indicatorVisible && !hasScrolled ? 1 : 0,
-          y: indicatorVisible && !hasScrolled ? 0 : 8,
-        }}
-        transition={{ duration: 0.7, ease: [0.25, 0, 0, 1] }}
-      >
-        <span className="font-poppins text-[10px] tracking-[0.3em] uppercase text-cream/30">Scroll</span>
-        <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 1.4, ease: "easeInOut", repeat: Infinity }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-cream/25">
-            <path d="M12 5v14M5 12l7 7 7-7" />
-          </svg>
-        </motion.div>
-      </motion.div>
     </div>
   );
 }
