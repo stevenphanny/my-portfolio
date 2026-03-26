@@ -81,7 +81,7 @@ export function IntroSection() {
           variants={row1Variants}
           initial="hidden"
           animate="show"
-          className="font-instrument-serif text-cream leading-none tracking-tight mr-10"
+          className="font-instrument-serif text-cream leading-none tracking-tight "
           style={{ fontSize: "clamp(4rem, 13vw, 14rem)" }}
         >
           Steven Phan
@@ -91,7 +91,7 @@ export function IntroSection() {
       {/* ── Rows 2 & 3: move together ────────────────────────────────────── */}
       <motion.div
         style={{ x: row2X }}
-      className="flex flex-col items-center gap-1 mr-10"
+      className="flex flex-col items-center gap-1"
       >
         <motion.p
           variants={row2Variants}
