@@ -4,9 +4,9 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
 // ── Tuning (adjust these) ─────────────────────────────────────────────────────
-const CARD_RATIO    = 16 / 10;  // image aspect ratio — try 16/9, 16/10, 3/2
+const CARD_RATIO    = 16 / 9.5; // image aspect ratio — try 16/9, 16/9.5, 16/10, 3/2
 const PARALLAX_PX   = 30;       // how far the image shifts on scroll (px each direction)
-const IMAGE_SCALE   = 1.15;     // image is 15% larger than card so edges never show
+const IMAGE_SCALE   = 1.08;     // image slightly larger than card so edges never show
 
 // ── Project data ──────────────────────────────────────────────────────────────
 type Project = {
@@ -36,7 +36,7 @@ const PROJECTS: Project[] = [
     title: "BeeSafe",
     tags: ["Next.js", "TypeScript", "PostgreSQL"],
     desc: "A short description of what this project does, the problem it solves, and what was interesting about building it. Replace with your real content.",
-    image: "/projects/beeSafe.jpg",
+    image: "/projects/beeSafe.png",
     imgClass: "bg-cream/10",
     live: "https://devpost.com/software/beesafe-njd4hi",
     github: "#",
@@ -112,7 +112,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
     <motion.div
       whileHover={{ y: -6, boxShadow: "0 12px 32px rgba(0,33,71,0.18)" }}
       transition={{ duration: 0.3, ease: [0.25, 0, 0, 1] }}
-      className="rounded-xl overflow-hidden cursor-pointer shadow-sm border-2 border-transparent hover:border-cream/20 transition-colors duration-300"
+      className="group rounded-xl overflow-hidden cursor-pointer relative"
       style={{ aspectRatio: CARD_RATIO }}
     >
       {project.image ? (
