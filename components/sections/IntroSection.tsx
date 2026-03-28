@@ -56,7 +56,7 @@ function HeroLetter({
   const rawY = useMotionValue(0);
   // stiffness: how aggressively the spring snaps to target (higher = faster)
   // damping: how quickly oscillation settles (lower = bouncier)
-  const y = useSpring(rawY, { stiffness: 500, damping: 20 });
+  const y = useSpring(rawY, { stiffness: 250, damping: 20 });
 
   useEffect(() => {
     if (char === " ") return;
