@@ -13,6 +13,7 @@ export default function Home() {
           <section
             key={id}
             id={id}
+            data-bg={bgClass?.replace("bg-", "")}
             className={`min-h-screen flex items-center justify-center px-6 py-24 ${bgClass ?? ""}`}
           >
             <Component />

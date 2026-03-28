@@ -60,9 +60,15 @@ body::-webkit-scrollbar {
 body {
   background: var(--color-navy);
   color: var(--color-cream);
+  cursor: none;
   margin: 0;
   padding: 0;
   height: 100%;
+}
+
+/* Ensure cursor: none propagates to all interactive elements */
+*, *::before, *::after {
+  cursor: none;
 }
 
 /* Prevent browser autofill from painting over cream-background inputs */
