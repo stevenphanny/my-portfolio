@@ -1,7 +1,7 @@
 "use client";
 
 import { m, motion, useMotionValue, useSpring } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // ── Tunables ──────────────────────────────────────────────────────────────────
 
@@ -50,7 +50,7 @@ const COLOR_TRANSITION_MS = 300;
 //     0.5–1   = natural weight, slight momentum
 //     2–5     = heavy, drifts and takes time to catch up
 //
-const SPRING_CONFIG = { stiffness: 3000, damping: 150, mass: 1 };
+const SPRING_CONFIG = { stiffness: 3000, damping: 150};
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function CustomCursor() {
@@ -61,28 +61,42 @@ export function CustomCursor() {
 
   const [visible, setVisible] = useState(false);
   const [color, setColor] = useState(DEFAULT_COLOR);
+  // Store last known viewport cursor position so scroll can re-check colour
+  const pointerPos = useRef({ cx: -1, cy: -1 });
 
   useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      rawX.set(e.clientX - CURSOR_SIZE / 2);
-      rawY.set(e.clientY - CURSOR_SIZE / 2);
-
-      // Walk up from the element under the pointer to find the nearest data-bg
-      const target = document.elementFromPoint(e.clientX, e.clientY);
+    // Detect the section background under a given viewport point
+    const detectColor = (cx: number, cy: number) => {
+      const target = document.elementFromPoint(cx, cy);
       const bgEl = target?.closest("[data-bg]") as HTMLElement | null;
       const bg = bgEl?.dataset.bg;
       setColor(bg && CURSOR_COLORS[bg] ? CURSOR_COLORS[bg] : DEFAULT_COLOR);
+    };
+
+    const onMove = (e: MouseEvent) => {
+      rawX.set(e.clientX - CURSOR_SIZE / 2);
+      rawY.set(e.clientY - CURSOR_SIZE / 2);
+      pointerPos.current = { cx: e.clientX, cy: e.clientY };
+      detectColor(e.clientX, e.clientY);
+    };
+
+    // Re-check colour on scroll — the section under the cursor may have changed
+    const onScroll = () => {
+      const { cx, cy } = pointerPos.current;
+      if (cx >= 0 && cy >= 0) detectColor(cx, cy);
     };
 
     const onEnter = () => setVisible(true);
     const onLeave = () => setVisible(false);
 
     document.addEventListener("mousemove", onMove);
+    window.addEventListener("scroll", onScroll, { passive: true });
     document.documentElement.addEventListener("mouseenter", onEnter);
     document.documentElement.addEventListener("mouseleave", onLeave);
 
     return () => {
       document.removeEventListener("mousemove", onMove);
+      window.removeEventListener("scroll", onScroll);
       document.documentElement.removeEventListener("mouseenter", onEnter);
       document.documentElement.removeEventListener("mouseleave", onLeave);
     };
