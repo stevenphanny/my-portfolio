@@ -7,13 +7,13 @@ import { useEffect, useRef, useState } from "react";
 
 // Circle diameter in px — bigger = more visible, smaller = more subtle
 // Range: 5–60   |  8–12 = subtle dot, 16–24 = standard, 30–60 = bold blob
-const CURSOR_SIZE = 20;
+const CURSOR_SIZE = 30;
 
 // bg name → cursor fill colour — add entries here for new section backgrounds
 // cream = #fcedd3, navy = #002147, tan = #d6a77a, black = #000000
 const CURSOR_COLORS: Record<string, string> = {
-  navy: "#d6a77a", // cream on navy
-  tan: "#fcedd3", // navy on tan
+  navy: "#fcedd3", // cream on navy
+  tan: "#002147", // navy on tan
   cream: "#002147", // navy on cream
   black: "#fcedd3", // cream on black
 };
