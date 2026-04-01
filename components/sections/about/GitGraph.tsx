@@ -13,6 +13,13 @@ const TOP_PAD     = 20;   // px: space above first node
 const BOTTOM_PAD  = 60;   // px: space below last node
 const DOT_R       = 5;    // px: dot radius (real pixels — no viewBox distortion)
 
+// ── Label tuning ──────────────────────────────────────────────────────────────
+// TECH_LABEL_OFFSET: px above the first Technical node — increase to push label up
+const TECH_LABEL_OFFSET = 63;
+// LIFE_LABEL_T: position along the fork bezier (0 = top of curve, 1 = first Life node)
+// decrease to move label higher/further up the curve; increase to move it closer to the node
+const LIFE_LABEL_T = 0.72;
+
 // X as fractions of container width
 // Trunk continues down as the left (technical) line.
 // Life branch forks off to the right.
@@ -31,6 +38,14 @@ const CARD_RIGHT_START = X_RIGHT + 0.02;   // 70%
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function nodeY(idx: number) { return TOP_PAD + idx * ROW_HEIGHT; }
+
+function evalBezier(t: number, x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number) {
+  const mt = 1 - t;
+  return {
+    x: mt*mt*mt*x0 + 3*mt*mt*t*x1 + 3*mt*t*t*x2 + t*t*t*x3,
+    y: mt*mt*mt*y0 + 3*mt*mt*t*y1 + 3*mt*t*t*y2 + t*t*t*y3,
+  };
+}
 
 // ── GitGraph ──────────────────────────────────────────────────────────────────
 export function GitGraph() {
@@ -74,6 +89,11 @@ export function GitGraph() {
   // Fork bezier: trunk continues straight (xL→xL), fork curves right (xL→xR)
   const midForkY = lastTrunkY + FORK_DROP / 2;
   const forkPath = `M ${xL} ${lastTrunkY} C ${xL} ${midForkY}, ${xR} ${midForkY}, ${xR} ${forkEndY}`;
+
+  // "Life" label position on the bezier curve (tuned via LIFE_LABEL_T above)
+  const lifeLabelPos = svgW > 0
+    ? evalBezier(LIFE_LABEL_T, xL, lastTrunkY, xL, midForkY, xR, midForkY, xR, forkEndY)
+    : { x: svgW * X_RIGHT, y: forkEndY - 34 };
 
   // ── Refs for animation ────────────────────────────────────────────────────
   const trunkLineRef      = useRef<SVGLineElement>(null);  // trunk: TOP_PAD → lastTrunkY
@@ -262,14 +282,14 @@ export function GitGraph() {
       <div
         ref={labelLeftRef}
         className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-cream/80 bg-navy border border-cream/40 rounded px-2.5 py-1 whitespace-nowrap"
-        style={{ left: `${X_LEFT * 100}%`, top: forkEndY - 34, transform: "translateX(-50%)" }}
+        style={{ left: `${X_LEFT * 100}%`, top: forkEndY - TECH_LABEL_OFFSET, transform: "translateX(-50%)" }}
       >
         Technical
       </div>
       <div
         ref={labelRightRef}
         className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-cream/80 bg-navy border border-cream/40 rounded px-2.5 py-1 whitespace-nowrap"
-        style={{ left: `${X_RIGHT * 100}%`, top: forkEndY - 34, transform: "translateX(-50%)" }}
+        style={{ left: lifeLabelPos.x, top: lifeLabelPos.y - 12, transform: "translateX(-50%)" }}
       >
         Life
       </div>
