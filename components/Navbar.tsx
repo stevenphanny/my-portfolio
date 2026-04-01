@@ -127,6 +127,15 @@ export function Navbar({ sections }: NavbarProps) {
                 </button>
               </li>
             ))}
+            <li>
+              <a
+                href="/StevenPhan_Resume.pdf"
+                download
+                className="block rounded-sm border border-navy px-3 py-2 font-poppins text-navy transition-colors hover:bg-navy hover:text-cream"
+              >
+                Resume
+              </a>
+            </li>
           </ul>
         </nav>
       </div>
@@ -163,6 +172,15 @@ export function Navbar({ sections }: NavbarProps) {
                   </button>
                 </motion.li>
               ))}
+              <motion.li variants={itemVariants}>
+                <a
+                  href="/StevenPhan_Resume.pdf"
+                  download
+                  className={`cursor-pointer px-3 py-1.5 font-poppins rounded-sm border transition-colors duration-[600ms] ${scheme === "cream" ? "border-cream text-cream hover:bg-cream hover:text-navy" : "border-navy text-navy hover:bg-navy hover:text-cream"}`}
+                >
+                  Resume
+                </a>
+              </motion.li>
             </motion.ul>
           </nav>
         </div>
