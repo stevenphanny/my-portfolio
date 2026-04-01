@@ -258,18 +258,18 @@ export function GitGraph() {
         </svg>
       )}
 
-      {/* ── Branch labels ── */}
+      {/* ── Branch label nodes — pill badges centered on their branch lines ── */}
       <div
         ref={labelLeftRef}
-        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.28em] uppercase text-cream/25"
-        style={{ left: `${X_LEFT * 100}%`, top: forkEndY - 22, transform: "translateX(-50%)" }}
+        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-cream/80 bg-navy border border-cream/40 rounded px-2.5 py-1 whitespace-nowrap"
+        style={{ left: `${X_LEFT * 100}%`, top: forkEndY - 34, transform: "translateX(-50%)" }}
       >
         Technical
       </div>
       <div
         ref={labelRightRef}
-        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.28em] uppercase text-cream/25"
-        style={{ left: `${X_RIGHT * 100}%`, top: forkEndY - 22, transform: "translateX(-50%)" }}
+        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-cream/80 bg-navy border border-cream/40 rounded px-2.5 py-1 whitespace-nowrap"
+        style={{ left: `${X_RIGHT * 100}%`, top: forkEndY - 34, transform: "translateX(-50%)" }}
       >
         Life
       </div>
