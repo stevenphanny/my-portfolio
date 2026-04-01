@@ -20,6 +20,50 @@ const TECH_LABEL_OFFSET = 63;
 // decrease to move label higher/further up the curve; increase to move it closer to the node
 const LIFE_LABEL_T = 0.72;
 
+// ── Scroll animation config ───────────────────────────────────────────────────
+const SCROLL = {
+  // ── Lines ──────────────────────────────────────────────────────────────────
+  // When the trunk line starts drawing (viewport %, e.g. "top 90%" = starts when
+  // top of section is 90% down the viewport — decrease to start later / further in)
+  TRUNK_START:        "top 50%",
+  // Base viewport % used to place the fork animation window — decrease to push fork earlier
+  FORK_BASE:          38,
+  // How far the fork window shifts based on how many trunk events there are
+  FORK_SPREAD:        52,
+  // Fraction of scroll range devoted to the fork drawing (larger = fork draws over more scroll)
+  FORK_WINDOW:        0.5,
+  // When branch lines finish drawing — decrease % to finish earlier (e.g. "bottom 35%")
+  BRANCHES_END:       "bottom 25%",
+  // Scrub smoothness for lines: 0 = instant snap, higher = more lag/smoothness
+  LINE_SCRUB:         0.4,
+
+  // ── Dots ───────────────────────────────────────────────────────────────────
+  DOT_FADE_START:     "top 85%",  // dot starts fading in
+  DOT_FADE_END:       "top 68%",  // dot fully visible
+  DOT_FILL_START:     "top 68%",  // dot fill (cream) starts
+  DOT_FILL_END:       "top 52%",  // dot fill completes
+  DOT_SCRUB:          0.3,
+
+  // ── Cards — desktop ────────────────────────────────────────────────────────
+  CARD_START:         "top 88%",
+  CARD_END:           "top 65%",
+  CARD_SCRUB:         0.5,
+  CARD_X_RIGHT:       30,   // px: right-branch cards slide in from this x offset
+  CARD_X_LEFT:        -25,  // px: left-branch cards slide in from this x offset
+
+  // ── Branch labels — desktop ────────────────────────────────────────────────
+  LABEL_START:        "top 85%",
+  LABEL_END:          "top 70%",
+  LABEL_SCRUB:        0.4,
+  LABEL_Y_OFFSET:     8,    // px: labels rise this many px on entry
+
+  // ── Cards — mobile ─────────────────────────────────────────────────────────
+  CARD_MOBILE_START:  "top 90%",
+  CARD_MOBILE_END:    "top 72%",
+  CARD_MOBILE_X:      28,   // px: cards slide in from this x offset
+  CARD_MOBILE_SCRUB:  0.5,
+};
+
 // X as fractions of container width
 // Trunk continues down as the left (technical) line.
 // Life branch forks off to the right.
@@ -139,28 +183,28 @@ export function GitGraph() {
       prep(rightBranchLineRef.current);
 
       // Scroll positions where trunk ends and fork completes
-      const forkS = `top ${78 - trunkFrac * 52}%`;
-      const forkE = `top ${78 - (trunkFrac + 0.12) * 52}%`;
+      const forkS = `top ${SCROLL.FORK_BASE - trunkFrac * SCROLL.FORK_SPREAD}%`;
+      const forkE = `top ${SCROLL.FORK_BASE - (trunkFrac + SCROLL.FORK_WINDOW) * SCROLL.FORK_SPREAD}%`;
 
       // 1. Trunk line draws until fork begins
       gsap.to(trunkLineRef.current, {
         strokeDashoffset: 0, ease: "none",
-        scrollTrigger: { trigger, start: "top 78%", end: forkS, scrub: 0.4 },
+        scrollTrigger: { trigger, start: SCROLL.TRUNK_START, end: forkS, scrub: SCROLL.LINE_SCRUB },
       });
 
       // 2. Left drop (straight connector on xL) + fork bezier draw together
       gsap.to(leftDropRef.current, {
         strokeDashoffset: 0, ease: "none",
-        scrollTrigger: { trigger, start: forkS, end: forkE, scrub: 0.4 },
+        scrollTrigger: { trigger, start: forkS, end: forkE, scrub: SCROLL.LINE_SCRUB },
       });
       gsap.to(forkRef.current, {
         strokeDashoffset: 0, ease: "none",
-        scrollTrigger: { trigger, start: forkS, end: forkE, scrub: 0.4 },
+        scrollTrigger: { trigger, start: forkS, end: forkE, scrub: SCROLL.LINE_SCRUB },
       });
 
       // 3. Both branch lines share identical triggers → draw in perfect sync
       //    (they are the same length so matching start/end guarantees same speed)
-      const branchTrigger = { trigger, start: forkE, end: "bottom 25%", scrub: 0.4 };
+      const branchTrigger = { trigger, start: forkE, end: SCROLL.BRANCHES_END, scrub: SCROLL.LINE_SCRUB };
       gsap.to(leftBranchLineRef.current,  { strokeDashoffset: 0, ease: "none", scrollTrigger: branchTrigger });
       gsap.to(rightBranchLineRef.current, { strokeDashoffset: 0, ease: "none", scrollTrigger: branchTrigger });
 
@@ -169,11 +213,11 @@ export function GitGraph() {
         if (!dot) return;
         gsap.fromTo(dot, { opacity: 0 }, {
           opacity: 1,
-          scrollTrigger: { trigger: dot, start: "top 85%", end: "top 68%", scrub: 0.3 },
+          scrollTrigger: { trigger: dot, start: SCROLL.DOT_FADE_START, end: SCROLL.DOT_FADE_END, scrub: SCROLL.DOT_SCRUB },
         });
         gsap.to(dot, {
           attr: { fill: "#fcedd3" },
-          scrollTrigger: { trigger: dot, start: "top 68%", end: "top 52%", scrub: 0.3 },
+          scrollTrigger: { trigger: dot, start: SCROLL.DOT_FILL_START, end: SCROLL.DOT_FILL_END, scrub: SCROLL.DOT_SCRUB },
         });
       });
 
@@ -182,17 +226,17 @@ export function GitGraph() {
       mm.add("(min-width: 768px)", () => {
         cardRefs.current.forEach((card) => {
           if (!card) return;
-          const xOff = card.dataset.branch === "right" ? 30 : -25;
+          const xOff = card.dataset.branch === "right" ? SCROLL.CARD_X_RIGHT : SCROLL.CARD_X_LEFT;
           gsap.fromTo(card,
             { opacity: 0, x: xOff },
-            { opacity: 1, x: 0, scrollTrigger: { trigger: card, start: "top 88%", end: "top 65%", scrub: 0.5 } },
+            { opacity: 1, x: 0, scrollTrigger: { trigger: card, start: SCROLL.CARD_START, end: SCROLL.CARD_END, scrub: SCROLL.CARD_SCRUB } },
           );
         });
         [labelLeftRef.current, labelRightRef.current].forEach((el) => {
           if (!el) return;
-          gsap.fromTo(el, { opacity: 0, y: 8 }, {
+          gsap.fromTo(el, { opacity: 0, y: SCROLL.LABEL_Y_OFFSET }, {
             opacity: 1, y: 0,
-            scrollTrigger: { trigger: el, start: "top 85%", end: "top 70%", scrub: 0.4 },
+            scrollTrigger: { trigger: el, start: SCROLL.LABEL_START, end: SCROLL.LABEL_END, scrub: SCROLL.LABEL_SCRUB },
           });
         });
       });
@@ -200,8 +244,8 @@ export function GitGraph() {
         cardRefs.current.forEach((card) => {
           if (!card) return;
           gsap.fromTo(card,
-            { opacity: 0, x: 28 },
-            { opacity: 1, x: 0, scrollTrigger: { trigger: card, start: "top 90%", end: "top 72%", scrub: 0.5 } },
+            { opacity: 0, x: SCROLL.CARD_MOBILE_X },
+            { opacity: 1, x: 0, scrollTrigger: { trigger: card, start: SCROLL.CARD_MOBILE_START, end: SCROLL.CARD_MOBILE_END, scrub: SCROLL.CARD_MOBILE_SCRUB } },
           );
         });
       });
