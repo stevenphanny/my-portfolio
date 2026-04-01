@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timelineData";
@@ -8,308 +8,246 @@ import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timeli
 gsap.registerPlugin(ScrollTrigger);
 
 // ── Layout constants ──────────────────────────────────────────────────────────
-const FORK_DROP = 70;       // px: how far below the last trunk node the fork curves end
-const TOP_PAD = 40;         // px: space above the first node
-const BOTTOM_PAD = 60;      // px: space below the last node
+const FORK_DROP   = 80;   // px: vertical drop of the fork bezier
+const TOP_PAD     = 20;   // px: space above first node
+const BOTTOM_PAD  = 60;   // px: space below last node
+const DOT_R       = 5;    // px: dot radius (real pixels — no viewBox distortion)
 
-// X positions as fractions of the SVG width (0–1)
-const X_TRUNK = 0.38;
-const X_LEFT  = 0.18;
-const X_RIGHT = 0.62;
+// X as fractions of container width
+// Trunk continues down as the left (technical) line.
+// Life branch forks off to the right.
+const X_LEFT  = 0.08;  // trunk / technical line
+const X_RIGHT = 0.55;  // extracurricular branch
+
+// Card zones (CSS % of container, same reference frame as X_LEFT/X_RIGHT)
+const CARD_LEFT_START  = X_LEFT  + 0.06;              // 14%
+const CARD_LEFT_END    = X_RIGHT - 0.04;               // 51%
+const CARD_RIGHT_START = X_RIGHT + 0.04;               // 59%
+const CARD_RIGHT_END   = 1.00;                          // 100%
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function nodeY(index: number): number {
-  return TOP_PAD + index * ROW_HEIGHT;
-}
+function nodeY(idx: number) { return TOP_PAD + idx * ROW_HEIGHT; }
 
 // ── GitGraph ──────────────────────────────────────────────────────────────────
 export function GitGraph() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const svgRef       = useRef<SVGSVGElement>(null);
 
-  const trunkLineRef   = useRef<SVGLineElement>(null);
-  const forkLeftRef    = useRef<SVGPathElement>(null);
-  const forkRightRef   = useRef<SVGPathElement>(null);
-  const branchLeftRef  = useRef<SVGLineElement>(null);
-  const branchRightRef = useRef<SVGLineElement>(null);
+  // Measure actual pixel width so SVG coordinates are 1:1 → perfect circles
+  const [svgW, setSvgW] = useState(0);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    setSvgW(el.offsetWidth);
+    const ro = new ResizeObserver(() => setSvgW(el.offsetWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
-  const dotRefs  = useRef<(SVGCircleElement | null)[]>([]);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const labelLeftRef  = useRef<HTMLDivElement>(null);
-  const labelRightRef = useRef<HTMLDivElement>(null);
-
-  // ── Separate events by phase ──
-  const trunkEvents  = useMemo(() => TIMELINE.filter(e => e.branch === "main"), []);
-  // Pair left+right events by index within branch groups
+  // ── Event arrays ──────────────────────────────────────────────────────────
+  const trunkEvents = useMemo(() => TIMELINE.filter(e => e.branch === "main"), []);
   const leftEvents  = useMemo(() => TIMELINE.filter(e => e.branch === "left"),  []);
   const rightEvents = useMemo(() => TIMELINE.filter(e => e.branch === "right"), []);
+  const maxRows     = Math.max(leftEvents.length, rightEvents.length);
 
-  const maxBranchRows = Math.max(leftEvents.length, rightEvents.length);
+  // ── Y geometry ────────────────────────────────────────────────────────────
+  const lastTrunkY     = nodeY(BRANCH_AFTER - 1);
+  const forkEndY       = lastTrunkY + FORK_DROP;
+  const branchY        = (i: number) => forkEndY + i * ROW_HEIGHT;
+  const lastBranchY    = branchY(maxRows - 1);
+  const svgHeight      = lastBranchY + BOTTOM_PAD;
 
-  // ── Y coordinates ──
-  const lastTrunkIndex = BRANCH_AFTER - 1;             // 0-based index of last trunk node
-  const lastTrunkY     = nodeY(lastTrunkIndex);
-  const forkEndY       = lastTrunkY + FORK_DROP;        // where branches start their straight segments
+  // ── X geometry (real pixels, derived from measured width) ─────────────────
+  const xL = svgW * X_LEFT;
+  const xR = svgW * X_RIGHT;
 
-  const totalRows    = BRANCH_AFTER + maxBranchRows;
-  const svgHeight    = nodeY(totalRows - 1) + BOTTOM_PAD;
+  // Fork bezier: trunk continues straight (xL→xL), fork curves right (xL→xR)
+  const midForkY = lastTrunkY + FORK_DROP / 2;
+  const forkPath = `M ${xL} ${lastTrunkY} C ${xL} ${midForkY}, ${xR} ${midForkY}, ${xR} ${forkEndY}`;
 
-  // ── Branch node Y: offset from forkEndY ──
-  function branchNodeY(branchIndex: number): number {
-    return forkEndY + branchIndex * ROW_HEIGHT;
-  }
+  // ── Refs for animation ────────────────────────────────────────────────────
+  const mainLineRef  = useRef<SVGLineElement>(null);  // continuous left line
+  const forkRef      = useRef<SVGPathElement>(null);  // bezier fork
+  const rightLineRef = useRef<SVGLineElement>(null);  // right branch line
 
-  // ── GSAP animations ──────────────────────────────────────────────────────────
+  const dotRefs  = useRef<(SVGCircleElement | null)[]>([]);
+  const cardRefs = useRef<(HTMLDivElement   | null)[]>([]);
+  const labelRightRef = useRef<HTMLDivElement>(null);
+  const labelLeftRef  = useRef<HTMLDivElement>(null);
+
+  // ── Node list (stable key ordering) ──────────────────────────────────────
+  type Node = { ev: TimelineEvent; x: number; y: number; key: string };
+
+  const nodes = useMemo<Node[]>(() => {
+    const list: Node[] = [];
+    trunkEvents.forEach((ev, i) => list.push({ ev, x: 0, y: nodeY(i),    key: `trunk-${i}` }));
+    for (let r = 0; r < maxRows; r++) {
+      if (leftEvents[r])  list.push({ ev: leftEvents[r],  x: 0, y: branchY(r), key: `left-${r}` });
+      if (rightEvents[r]) list.push({ ev: rightEvents[r], x: 0, y: branchY(r), key: `right-${r}` });
+    }
+    return list;
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── GSAP animations (re-run after width measured) ─────────────────────────
   useEffect(() => {
-    if (!containerRef.current || !svgRef.current) return;
+    if (!svgW || !containerRef.current) return;
 
     const ctx = gsap.context(() => {
-      const svgEl = svgRef.current!;
+      const trigger = containerRef.current!;
+      const trunkFrac = BRANCH_AFTER / (BRANCH_AFTER + maxRows);
 
-      // Helper: set up strokeDasharray on a line/path and return its length
-      function prep(el: SVGGeometryElement | null): number {
-        if (!el) return 0;
+      function prep(el: SVGGeometryElement | null) {
+        if (!el) return;
         const len = el.getTotalLength();
         gsap.set(el, { strokeDasharray: len, strokeDashoffset: len });
-        return len;
       }
+      prep(mainLineRef.current);
+      prep(forkRef.current);
+      prep(rightLineRef.current);
 
-      const trunkLen       = prep(trunkLineRef.current);
-      const forkLeftLen    = prep(forkLeftRef.current);
-      const forkRightLen   = prep(forkRightRef.current);
-      const branchLeftLen  = prep(branchLeftRef.current);
-      const branchRightLen = prep(branchRightRef.current);
-
-      // ── 1. Trunk draws in ──
-      gsap.to(trunkLineRef.current, {
-        strokeDashoffset: 0,
-        ease: "none",
-        scrollTrigger: {
-          trigger: svgEl,
-          start: "top 75%",
-          end: `top ${75 - (BRANCH_AFTER / totalRows) * 55}%`,
-          scrub: 0.4,
-        },
+      // 1. Main left line draws all the way through
+      gsap.to(mainLineRef.current, {
+        strokeDashoffset: 0, ease: "none",
+        scrollTrigger: { trigger, start: "top 78%", end: "bottom 25%", scrub: 0.4 },
       });
 
-      // ── 2. Fork curves draw in (after trunk) ──
-      const forkStart = `top ${75 - (BRANCH_AFTER / totalRows) * 55}%`;
-      const forkEnd   = `top ${75 - ((BRANCH_AFTER + 0.6) / totalRows) * 55}%`;
-
-      gsap.to(forkLeftRef.current, {
-        strokeDashoffset: 0,
-        ease: "none",
-        scrollTrigger: { trigger: svgEl, start: forkStart, end: forkEnd, scrub: 0.4 },
-      });
-      gsap.to(forkRightRef.current, {
-        strokeDashoffset: 0,
-        ease: "none",
-        scrollTrigger: { trigger: svgEl, start: forkStart, end: forkEnd, scrub: 0.4 },
+      // 2. Fork curve: starts drawing once trunk portion has scrolled past
+      const forkS = `top ${78 - trunkFrac * 52}%`;
+      const forkE = `top ${78 - (trunkFrac + 0.12) * 52}%`;
+      gsap.to(forkRef.current, {
+        strokeDashoffset: 0, ease: "none",
+        scrollTrigger: { trigger, start: forkS, end: forkE, scrub: 0.4 },
       });
 
-      // ── 3. Branch lines draw in ──
-      const branchStart = forkEnd;
-      const branchEnd   = "bottom 30%";
-
-      gsap.to(branchLeftRef.current, {
-        strokeDashoffset: 0,
-        ease: "none",
-        scrollTrigger: { trigger: svgEl, start: branchStart, end: branchEnd, scrub: 0.4 },
-      });
-      gsap.to(branchRightRef.current, {
-        strokeDashoffset: 0,
-        ease: "none",
-        scrollTrigger: { trigger: svgEl, start: branchStart, end: branchEnd, scrub: 0.4 },
+      // 3. Right branch line
+      gsap.to(rightLineRef.current, {
+        strokeDashoffset: 0, ease: "none",
+        scrollTrigger: { trigger, start: forkE, end: "bottom 25%", scrub: 0.4 },
       });
 
-      // suppress unused var warnings
-      void trunkLen; void forkLeftLen; void forkRightLen; void branchLeftLen; void branchRightLen;
-
-      // ── 4. Dots: scale in then fill ──
+      // 4. Dots: scale in → fill
       dotRefs.current.forEach((dot) => {
         if (!dot) return;
         gsap.fromTo(dot, { scale: 0 }, {
           scale: 1,
-          ease: "back.out(1.7)",
-          scrollTrigger: { trigger: dot, start: "top 85%", end: "top 70%", scrub: 0.3 },
+          scrollTrigger: { trigger: dot, start: "top 85%", end: "top 68%", scrub: 0.3 },
         });
         gsap.to(dot, {
-          attr: { fill: "#fcedd3", stroke: "#fcedd3" },
-          filter: "drop-shadow(0 0 6px rgba(252,237,211,0.5))",
-          scrollTrigger: { trigger: dot, start: "top 70%", end: "top 55%", scrub: 0.3 },
+          attr: { fill: "#fcedd3" },
+          scrollTrigger: { trigger: dot, start: "top 68%", end: "top 52%", scrub: 0.3 },
         });
       });
 
-      // ── 5. Cards: slide in from correct side ──
+      // 5. Cards + labels
       const mm = gsap.matchMedia();
-
       mm.add("(min-width: 768px)", () => {
         cardRefs.current.forEach((card) => {
           if (!card) return;
-          const branch = card.dataset.branch as "main" | "left" | "right";
-          const xFrom = branch === "left" ? -50 : branch === "right" ? 50 : -30;
+          const xOff = card.dataset.branch === "right" ? 30 : -25;
           gsap.fromTo(card,
-            { opacity: 0, x: xFrom },
-            {
-              opacity: 1, x: 0,
-              scrollTrigger: { trigger: card, start: "top 88%", end: "top 65%", scrub: 0.5 },
-            },
+            { opacity: 0, x: xOff },
+            { opacity: 1, x: 0, scrollTrigger: { trigger: card, start: "top 88%", end: "top 65%", scrub: 0.5 } },
           );
         });
-
-        // Branch labels fade in
         [labelLeftRef.current, labelRightRef.current].forEach((el) => {
           if (!el) return;
-          gsap.fromTo(el, { opacity: 0, y: 10 }, {
+          gsap.fromTo(el, { opacity: 0, y: 8 }, {
             opacity: 1, y: 0,
             scrollTrigger: { trigger: el, start: "top 85%", end: "top 70%", scrub: 0.4 },
           });
         });
       });
-
       mm.add("(max-width: 767px)", () => {
         cardRefs.current.forEach((card) => {
           if (!card) return;
           gsap.fromTo(card,
-            { opacity: 0, x: 30 },
-            {
-              opacity: 1, x: 0,
-              scrollTrigger: { trigger: card, start: "top 90%", end: "top 72%", scrub: 0.5 },
-            },
+            { opacity: 0, x: 28 },
+            { opacity: 1, x: 0, scrollTrigger: { trigger: card, start: "top 90%", end: "top 72%", scrub: 0.5 } },
           );
         });
       });
     }, containerRef);
 
     return () => ctx.revert();
-  }, []);
-
-  // ── SVG path strings ──────────────────────────────────────────────────────────
-  // These are computed at render time using % of SVG width.
-  // We pass width as a viewBox of 100 to make fractions easy.
-  const W = 100; // viewBox width units
-  const xT = X_TRUNK * W;
-  const xL = X_LEFT  * W;
-  const xR = X_RIGHT * W;
-
-  // Trunk: from top to last trunk node
-  const trunkD_y1 = 0;
-  const trunkD_y2 = lastTrunkY;
-
-  // Fork bezier mid points
-  const midY = lastTrunkY + FORK_DROP / 2;
-
-  const forkLeftD  = `M ${xT} ${lastTrunkY} C ${xT} ${midY}, ${xL} ${midY}, ${xL} ${forkEndY}`;
-  const forkRightD = `M ${xT} ${lastTrunkY} C ${xT} ${midY}, ${xR} ${midY}, ${xR} ${forkEndY}`;
-
-  // Branch lines: from forkEndY to last branch node
-  const lastBranchY = branchNodeY(maxBranchRows - 1);
-
-  // ── Build all nodes (dots + cards) ──────────────────────────────────────────
-  // Trunk nodes
-  const trunkNodes = trunkEvents.map((ev, i) => ({
-    ev, cx: xT, cy: nodeY(i), index: i,
-  }));
-
-  // Branch nodes: interleave left/right by row index
-  const branchNodes = Array.from({ length: maxBranchRows }, (_, rowI) => {
-    const nodes = [];
-    const lEv = leftEvents[rowI];
-    const rEv = rightEvents[rowI];
-    if (lEv) nodes.push({ ev: lEv, cx: xL, cy: branchNodeY(rowI), index: BRANCH_AFTER + rowI * 2 });
-    if (rEv) nodes.push({ ev: rEv, cx: xR, cy: branchNodeY(rowI), index: BRANCH_AFTER + rowI * 2 + 1 });
-    return nodes;
-  }).flat();
-
-  const allNodes = [...trunkNodes, ...branchNodes];
+  }, [svgW, maxRows]);
 
   return (
     <div ref={containerRef} className="relative w-full" style={{ height: svgHeight }}>
-      {/* ── SVG layer ── */}
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${W} ${svgHeight}`}
-        preserveAspectRatio="none"
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ overflow: "visible" }}
-      >
-        {/* Guide lines (dim) */}
-        <line x1={xT} y1={0} x2={xT} y2={lastTrunkY} stroke="rgba(252,237,211,0.08)" strokeWidth="0.5" />
-        <path d={forkLeftD}  fill="none" stroke="rgba(252,237,211,0.08)" strokeWidth="0.5" />
-        <path d={forkRightD} fill="none" stroke="rgba(252,237,211,0.08)" strokeWidth="0.5" />
-        <line x1={xL} y1={forkEndY} x2={xL} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="0.5" />
-        <line x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="0.5" />
 
-        {/* Animated lines */}
-        <line
-          ref={trunkLineRef}
-          x1={xT} y1={trunkD_y1} x2={xT} y2={trunkD_y2}
-          stroke="rgba(252,237,211,0.6)" strokeWidth="0.8"
-        />
-        <path
-          ref={forkLeftRef}
-          d={forkLeftD}
-          fill="none" stroke="rgba(252,237,211,0.5)" strokeWidth="0.8"
-        />
-        <path
-          ref={forkRightRef}
-          d={forkRightD}
-          fill="none" stroke="rgba(252,237,211,0.35)" strokeWidth="0.8"
-        />
-        <line
-          ref={branchLeftRef}
-          x1={xL} y1={forkEndY} x2={xL} y2={lastBranchY}
-          stroke="rgba(252,237,211,0.5)" strokeWidth="0.8"
-        />
-        <line
-          ref={branchRightRef}
-          x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY}
-          stroke="rgba(252,237,211,0.35)" strokeWidth="0.8"
-        />
+      {/* ── SVG: lines + dots (only renders once width is known) ── */}
+      {svgW > 0 && (
+        <svg
+          width={svgW}
+          height={svgHeight}
+          className="absolute inset-0 pointer-events-none"
+          style={{ overflow: "visible" }}
+        >
+          {/* Guide lines (dim track) */}
+          <line x1={xL} y1={TOP_PAD} x2={xL} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
+          <path d={forkPath} fill="none" stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
+          <line x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
 
-        {/* Dots */}
-        {allNodes.map(({ cx, cy, index }) => (
-          <circle
-            key={index}
-            ref={(el) => { dotRefs.current[index] = el; }}
-            cx={cx}
-            cy={cy}
-            r={3.5}
-            fill="#002147"
-            stroke="rgba(252,237,211,0.5)"
-            strokeWidth="0.8"
-            style={{ transformOrigin: `${cx}px ${cy}px` }}
+          {/* Animated: main left line (trunk + left branch continuation) */}
+          <line ref={mainLineRef}
+            x1={xL} y1={TOP_PAD} x2={xL} y2={lastBranchY}
+            stroke="rgba(252,237,211,0.55)" strokeWidth="1.5"
           />
-        ))}
-      </svg>
 
-      {/* ── Branch labels (desktop only) ── */}
+          {/* Animated: fork bezier */}
+          <path ref={forkRef}
+            d={forkPath} fill="none"
+            stroke="rgba(252,237,211,0.45)" strokeWidth="1.5"
+          />
+
+          {/* Animated: right branch */}
+          <line ref={rightLineRef}
+            x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY}
+            stroke="rgba(252,237,211,0.35)" strokeWidth="1.5"
+          />
+
+          {/* Dots — real pixel coords, no viewBox → perfect circles */}
+          {nodes.map(({ ev, y, key }, i) => {
+            const cx = ev.branch === "right" ? xR : xL;
+            return (
+              <circle
+                key={key}
+                ref={(el) => { dotRefs.current[i] = el; }}
+                cx={cx}
+                cy={y}
+                r={DOT_R}
+                fill="#002147"
+                stroke="rgba(252,237,211,0.55)"
+                strokeWidth="1.5"
+                style={{ transformOrigin: `${cx}px ${y}px` }}
+              />
+            );
+          })}
+        </svg>
+      )}
+
+      {/* ── Branch labels ── */}
       <div
         ref={labelLeftRef}
-        className="hidden md:block absolute font-poppins text-[10px] tracking-[0.25em] uppercase text-cream/30"
-        style={{ left: `${X_LEFT * 100}%`, top: forkEndY - 28, transform: "translateX(-50%)" }}
+        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.28em] uppercase text-cream/25"
+        style={{ left: `${X_LEFT * 100}%`, top: forkEndY - 22, transform: "translateX(-50%)" }}
       >
         Technical
       </div>
       <div
         ref={labelRightRef}
-        className="hidden md:block absolute font-poppins text-[10px] tracking-[0.25em] uppercase text-cream/30"
-        style={{ left: `${X_RIGHT * 100}%`, top: forkEndY - 28, transform: "translateX(-50%)" }}
+        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.28em] uppercase text-cream/25"
+        style={{ left: `${X_RIGHT * 100}%`, top: forkEndY - 22, transform: "translateX(-50%)" }}
       >
         Life
       </div>
 
       {/* ── Event cards ── */}
-      {allNodes.map(({ ev, cx, cy, index }) => (
+      {nodes.map(({ ev, y, key }, i) => (
         <EventCard
-          key={index}
+          key={key}
           ev={ev}
-          cx={cx}
-          cy={cy}
-          index={index}
-          cardRef={(el) => { cardRefs.current[index] = el; }}
-          svgWidth={W}
+          y={y}
+          cardRef={(el) => { cardRefs.current[i] = el; }}
         />
       ))}
     </div>
@@ -319,55 +257,36 @@ export function GitGraph() {
 // ── EventCard ─────────────────────────────────────────────────────────────────
 function EventCard({
   ev,
-  cx,
-  cy,
-  index,
+  y,
   cardRef,
-  svgWidth,
 }: {
   ev: TimelineEvent;
-  cx: number;
-  cy: number;
-  index: number;
+  y: number;
   cardRef: (el: HTMLDivElement | null) => void;
-  svgWidth: number;
 }) {
-  const isTrunk = ev.branch === "main";
-  const isLeft  = ev.branch === "left";
+  const isRight = ev.branch === "right";
 
-  // On desktop: left-branch cards go to the left of their dot, right-branch to the right
-  // On mobile: all cards go to the right of the trunk
-  const desktopStyle: React.CSSProperties = {
-    position: "absolute",
-    top: cy - 14,
-  };
-
-  if (isTrunk || isLeft) {
-    // Anchor from the right edge of the left zone
-    desktopStyle.right = `${(1 - cx / svgWidth) * 100 + 4}%`;
-    desktopStyle.textAlign = "right";
-  } else {
-    // Anchor from the left edge of the right zone
-    desktopStyle.left = `${(cx / svgWidth) * 100 + 4}%`;
-    desktopStyle.textAlign = "left";
-  }
+  // All cards sit to the RIGHT of their respective branch line.
+  // Left/trunk: CARD_LEFT_START% → CARD_LEFT_END%
+  // Right:      CARD_RIGHT_START% → CARD_RIGHT_END%
+  const leftPct  = `${(isRight ? CARD_RIGHT_START : CARD_LEFT_START) * 100}%`;
+  const widthPct = `${((isRight ? CARD_RIGHT_END - CARD_RIGHT_START : CARD_LEFT_END - CARD_LEFT_START) * 100)}%`;
 
   return (
     <div
       ref={cardRef}
       data-branch={ev.branch}
-      data-index={index}
-      className="absolute md:w-[36%] w-[calc(100%-48px)]"
-      style={desktopStyle}
+      className="absolute"
+      style={{ top: y - 12, left: leftPct, width: widthPct }}
     >
-      <span className="font-poppins text-[11px] tracking-[0.2em] text-cream/35 block">
+      <span className="font-poppins text-[10px] tracking-[0.2em] text-cream/30 block">
         {ev.year}
       </span>
-      <p className={`font-instrument-serif mt-0.5 text-cream leading-snug ${isTrunk ? "text-xl" : "text-lg"}`}>
+      <p className={`font-instrument-serif mt-0.5 text-cream leading-snug ${ev.branch === "main" ? "text-xl" : "text-[17px]"}`}>
         {ev.event}
       </p>
       {ev.detail && (
-        <p className="font-lora text-xs text-cream/40 mt-0.5 leading-relaxed">
+        <p className="font-lora text-xs text-cream/40 mt-1 leading-relaxed">
           {ev.detail}
         </p>
       )}
