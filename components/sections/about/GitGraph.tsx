@@ -8,7 +8,7 @@ import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timeli
 gsap.registerPlugin(ScrollTrigger);
 
 // ── Layout constants ──────────────────────────────────────────────────────────
-const FORK_DROP   = 80;   // px: vertical drop of the fork bezier
+const FORK_DROP   = ROW_HEIGHT;  // match row spacing for consistent dot gaps
 const TOP_PAD     = 20;   // px: space above first node
 const BOTTOM_PAD  = 60;   // px: space below last node
 const DOT_R       = 5;    // px: dot radius (real pixels — no viewBox distortion)
@@ -16,14 +16,18 @@ const DOT_R       = 5;    // px: dot radius (real pixels — no viewBox distorti
 // X as fractions of container width
 // Trunk continues down as the left (technical) line.
 // Life branch forks off to the right.
-const X_LEFT  = 0.08;  // trunk / technical line
-const X_RIGHT = 0.55;  // extracurricular branch
+const X_LEFT  = 0.32;  // trunk / technical line
+const X_RIGHT = 0.68;  // extracurricular branch
 
-// Card zones (CSS % of container, same reference frame as X_LEFT/X_RIGHT)
-const CARD_LEFT_START  = X_LEFT  + 0.06;              // 14%
-const CARD_LEFT_END    = X_RIGHT - 0.04;               // 51%
-const CARD_RIGHT_START = X_RIGHT + 0.04;               // 59%
-const CARD_RIGHT_END   = 1.00;                          // 100%
+// Card zones (CSS % of container)
+// "main"  → between the two lines
+const CARD_MAIN_LEFT   = X_LEFT  + 0.04;   // 36%
+const CARD_MAIN_RIGHT  = X_RIGHT - 0.04;   // 64%
+// "left"  → to the LEFT of X_LEFT (right edge of card aligned near line)
+const CARD_LEFT_END    = X_LEFT  - 0.02;   // 30%
+const CARD_LEFT_WIDTH  = 0.28;             // 28% wide → left edge at ~2%
+// "right" → to the RIGHT of X_RIGHT
+const CARD_RIGHT_START = X_RIGHT + 0.02;   // 70%
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function nodeY(idx: number) { return TOP_PAD + idx * ROW_HEIGHT; }
@@ -65,9 +69,11 @@ export function GitGraph() {
   const forkPath = `M ${xL} ${lastTrunkY} C ${xL} ${midForkY}, ${xR} ${midForkY}, ${xR} ${forkEndY}`;
 
   // ── Refs for animation ────────────────────────────────────────────────────
-  const mainLineRef  = useRef<SVGLineElement>(null);  // continuous left line
-  const forkRef      = useRef<SVGPathElement>(null);  // bezier fork
-  const rightLineRef = useRef<SVGLineElement>(null);  // right branch line
+  const trunkLineRef      = useRef<SVGLineElement>(null);  // trunk: TOP_PAD → lastTrunkY
+  const leftDropRef       = useRef<SVGLineElement>(null);  // left continuation: lastTrunkY → forkEndY
+  const forkRef           = useRef<SVGPathElement>(null);  // bezier fork to right
+  const leftBranchLineRef = useRef<SVGLineElement>(null);  // left branch: forkEndY → lastBranchY
+  const rightBranchLineRef= useRef<SVGLineElement>(null);  // right branch: forkEndY → lastBranchY
 
   const dotRefs  = useRef<(SVGCircleElement | null)[]>([]);
   const cardRefs = useRef<(HTMLDivElement   | null)[]>([]);
@@ -101,35 +107,43 @@ export function GitGraph() {
         const len = el.getTotalLength();
         gsap.set(el, { strokeDasharray: len, strokeDashoffset: len });
       }
-      prep(mainLineRef.current);
+      prep(trunkLineRef.current);
+      prep(leftDropRef.current);
       prep(forkRef.current);
-      prep(rightLineRef.current);
+      prep(leftBranchLineRef.current);
+      prep(rightBranchLineRef.current);
 
-      // 1. Main left line draws all the way through
-      gsap.to(mainLineRef.current, {
-        strokeDashoffset: 0, ease: "none",
-        scrollTrigger: { trigger, start: "top 78%", end: "bottom 25%", scrub: 0.4 },
-      });
-
-      // 2. Fork curve: starts drawing once trunk portion has scrolled past
+      // Scroll positions where trunk ends and fork completes
       const forkS = `top ${78 - trunkFrac * 52}%`;
       const forkE = `top ${78 - (trunkFrac + 0.12) * 52}%`;
+
+      // 1. Trunk line draws until fork begins
+      gsap.to(trunkLineRef.current, {
+        strokeDashoffset: 0, ease: "none",
+        scrollTrigger: { trigger, start: "top 78%", end: forkS, scrub: 0.4 },
+      });
+
+      // 2. Left drop (straight connector on xL) + fork bezier draw together
+      gsap.to(leftDropRef.current, {
+        strokeDashoffset: 0, ease: "none",
+        scrollTrigger: { trigger, start: forkS, end: forkE, scrub: 0.4 },
+      });
       gsap.to(forkRef.current, {
         strokeDashoffset: 0, ease: "none",
         scrollTrigger: { trigger, start: forkS, end: forkE, scrub: 0.4 },
       });
 
-      // 3. Right branch line
-      gsap.to(rightLineRef.current, {
-        strokeDashoffset: 0, ease: "none",
-        scrollTrigger: { trigger, start: forkE, end: "bottom 25%", scrub: 0.4 },
-      });
+      // 3. Both branch lines share identical triggers → draw in perfect sync
+      //    (they are the same length so matching start/end guarantees same speed)
+      const branchTrigger = { trigger, start: forkE, end: "bottom 25%", scrub: 0.4 };
+      gsap.to(leftBranchLineRef.current,  { strokeDashoffset: 0, ease: "none", scrollTrigger: branchTrigger });
+      gsap.to(rightBranchLineRef.current, { strokeDashoffset: 0, ease: "none", scrollTrigger: branchTrigger });
 
-      // 4. Dots: scale in → fill
+      // 4. Dots: fade in → fill
       dotRefs.current.forEach((dot) => {
         if (!dot) return;
-        gsap.fromTo(dot, { scale: 0 }, {
-          scale: 1,
+        gsap.fromTo(dot, { opacity: 0 }, {
+          opacity: 1,
           scrollTrigger: { trigger: dot, start: "top 85%", end: "top 68%", scrub: 0.3 },
         });
         gsap.to(dot, {
@@ -183,24 +197,38 @@ export function GitGraph() {
           style={{ overflow: "visible" }}
         >
           {/* Guide lines (dim track) */}
-          <line x1={xL} y1={TOP_PAD} x2={xL} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
+          <line x1={xL} y1={TOP_PAD} x2={xL} y2={lastTrunkY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
+          <line x1={xL} y1={lastTrunkY} x2={xL} y2={forkEndY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
           <path d={forkPath} fill="none" stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
+          <line x1={xL} y1={forkEndY} x2={xL} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
           <line x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
 
-          {/* Animated: main left line (trunk + left branch continuation) */}
-          <line ref={mainLineRef}
-            x1={xL} y1={TOP_PAD} x2={xL} y2={lastBranchY}
+          {/* Animated: trunk (before fork) */}
+          <line ref={trunkLineRef}
+            x1={xL} y1={TOP_PAD} x2={xL} y2={lastTrunkY}
             stroke="rgba(252,237,211,0.55)" strokeWidth="1.5"
           />
 
-          {/* Animated: fork bezier */}
+          {/* Animated: left drop — straight connector on xL from trunk to branch */}
+          <line ref={leftDropRef}
+            x1={xL} y1={lastTrunkY} x2={xL} y2={forkEndY}
+            stroke="rgba(252,237,211,0.55)" strokeWidth="1.5"
+          />
+
+          {/* Animated: fork bezier to right branch */}
           <path ref={forkRef}
             d={forkPath} fill="none"
             stroke="rgba(252,237,211,0.45)" strokeWidth="1.5"
           />
 
-          {/* Animated: right branch */}
-          <line ref={rightLineRef}
+          {/* Animated: left branch (after fork) — synced with right */}
+          <line ref={leftBranchLineRef}
+            x1={xL} y1={forkEndY} x2={xL} y2={lastBranchY}
+            stroke="rgba(252,237,211,0.55)" strokeWidth="1.5"
+          />
+
+          {/* Animated: right branch (after fork) — synced with left */}
+          <line ref={rightBranchLineRef}
             x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY}
             stroke="rgba(252,237,211,0.35)" strokeWidth="1.5"
           />
@@ -265,19 +293,35 @@ function EventCard({
   cardRef: (el: HTMLDivElement | null) => void;
 }) {
   const isRight = ev.branch === "right";
+  const isLeft  = ev.branch === "left";
 
-  // All cards sit to the RIGHT of their respective branch line.
-  // Left/trunk: CARD_LEFT_START% → CARD_LEFT_END%
-  // Right:      CARD_RIGHT_START% → CARD_RIGHT_END%
-  const leftPct  = `${(isRight ? CARD_RIGHT_START : CARD_LEFT_START) * 100}%`;
-  const widthPct = `${((isRight ? CARD_RIGHT_END - CARD_RIGHT_START : CARD_LEFT_END - CARD_LEFT_START) * 100)}%`;
+  // "left"  → sits to the LEFT of the technical line, right-aligned text
+  // "right" → sits to the RIGHT of the life branch, left-aligned text
+  // "main"  → sits between the two lines, left-aligned text
+  let posStyle: React.CSSProperties;
+  const textAlign: React.CSSProperties["textAlign"] = isRight ? "left" : "right";
+
+  if (isRight) {
+    posStyle = {
+      top: y - 12,
+      left: `${CARD_RIGHT_START * 100}%`,
+      width: `${(1 - CARD_RIGHT_START) * 100}%`,
+    };
+  } else {
+    // "left" and "main" both sit to the LEFT of the technical line, right-aligned
+    posStyle = {
+      top: y - 12,
+      right: `${(1 - CARD_LEFT_END) * 100}%`,
+      width: `${CARD_LEFT_WIDTH * 100}%`,
+    };
+  }
 
   return (
     <div
       ref={cardRef}
       data-branch={ev.branch}
       className="absolute"
-      style={{ top: y - 12, left: leftPct, width: widthPct }}
+      style={{ ...posStyle, textAlign }}
     >
       <span className="font-poppins text-[10px] tracking-[0.2em] text-cream/30 block">
         {ev.year}

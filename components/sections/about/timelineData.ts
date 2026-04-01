@@ -3,7 +3,7 @@
 export const BRANCH_AFTER = 2;
 
 /** Vertical px between event rows. Must match GitGraph's ROW_HEIGHT. */
-export const ROW_HEIGHT = 130;
+export const ROW_HEIGHT = 160;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export type Branch = "main" | "left" | "right";
@@ -68,5 +68,41 @@ export const TIMELINE: TimelineEvent[] = [
     year: "2025",
     event: "Hackathon finalist",
     detail: "24 h build · top 5 team",
+  },
+  {
+    branch: "left",
+    year: "2025",
+    event: "Open source contributions",
+    detail: "TypeScript tooling & component libs",
+  },
+  {
+    branch: "right",
+    year: "2025",
+    event: "Rock climbing",
+    detail: "Found a new weekend pursuit",
+  },
+  {
+    branch: "left",
+    year: "2026",
+    event: "Graduating",
+    detail: "Bachelor of Software Engineering",
+  },
+  {
+    branch: "right",
+    year: "2026",
+    event: "Exploring Southeast Asia",
+    detail: "Post-degree travel chapter",
+  },
+  {
+    branch: "left",
+    year: "2026",
+    event: "Building in public",
+    detail: "Shipping side projects & tools",
+  },
+  {
+    branch: "right",
+    year: "2026",
+    event: "What's next",
+    detail: "The adventure continues…",
   },
 ];
