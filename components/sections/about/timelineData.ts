@@ -22,7 +22,7 @@ export type TimelineEvent = {
 export const TIMELINE: TimelineEvent[] = [
   {
     branch: "main",
-    year: "2022",
+    year: "2023",
     event: "Started Software Engineering",
     detail: "Monash University",
   },
@@ -51,12 +51,12 @@ export const TIMELINE: TimelineEvent[] = [
     event: "Second internship",
     detail: "UI-focused engineering role",
   },
-  {
-    branch: "right",
-    year: "2024",
-    event: "Project officer",
-    detail: "Led internal events & workshops",
-  },
+  // {
+  //   branch: "right",
+  //   year: "2024",
+  //   event: "Project officer",
+  //   detail: "Led internal events & workshops",
+  // },
   {
     branch: "left",
     year: "2025",
@@ -87,12 +87,12 @@ export const TIMELINE: TimelineEvent[] = [
     event: "Graduating",
     detail: "Bachelor of Software Engineering",
   },
-  {
-    branch: "right",
-    year: "2026",
-    event: "Exploring Southeast Asia",
-    detail: "Post-degree travel chapter",
-  },
+  // {
+  //   branch: "right",
+  //   year: "2026",
+  //   event: "Exploring Southeast Asia",
+  //   detail: "Post-degree travel chapter",
+  // },
   {
     branch: "left",
     year: "2026",

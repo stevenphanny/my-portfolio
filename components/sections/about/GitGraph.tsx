@@ -54,11 +54,18 @@ export function GitGraph() {
   const maxRows     = Math.max(leftEvents.length, rightEvents.length);
 
   // ── Y geometry ────────────────────────────────────────────────────────────
-  const lastTrunkY     = nodeY(BRANCH_AFTER - 1);
-  const forkEndY       = lastTrunkY + FORK_DROP;
-  const branchY        = (i: number) => forkEndY + i * ROW_HEIGHT;
-  const lastBranchY    = branchY(maxRows - 1);
-  const svgHeight      = lastBranchY + BOTTOM_PAD;
+  const lastTrunkY      = nodeY(BRANCH_AFTER - 1);
+  const forkEndY        = lastTrunkY + FORK_DROP;
+  const totalBranchSpan = (maxRows - 1) * ROW_HEIGHT;   // fixed height both branches fill
+  const lastBranchY     = forkEndY + totalBranchSpan;
+  const svgHeight       = lastBranchY + BOTTOM_PAD;
+
+  // Each branch distributes its own nodes evenly over totalBranchSpan,
+  // so a branch with fewer nodes gets wider spacing automatically.
+  const leftY  = (i: number) =>
+    leftEvents.length  <= 1 ? forkEndY : forkEndY + (i / (leftEvents.length  - 1)) * totalBranchSpan;
+  const rightY = (i: number) =>
+    rightEvents.length <= 1 ? forkEndY : forkEndY + (i / (rightEvents.length - 1)) * totalBranchSpan;
 
   // ── X geometry (real pixels, derived from measured width) ─────────────────
   const xL = svgW * X_LEFT;
@@ -85,11 +92,9 @@ export function GitGraph() {
 
   const nodes = useMemo<Node[]>(() => {
     const list: Node[] = [];
-    trunkEvents.forEach((ev, i) => list.push({ ev, x: 0, y: nodeY(i),    key: `trunk-${i}` }));
-    for (let r = 0; r < maxRows; r++) {
-      if (leftEvents[r])  list.push({ ev: leftEvents[r],  x: 0, y: branchY(r), key: `left-${r}` });
-      if (rightEvents[r]) list.push({ ev: rightEvents[r], x: 0, y: branchY(r), key: `right-${r}` });
-    }
+    trunkEvents.forEach( (ev, i) => list.push({ ev, x: 0, y: nodeY(i),  key: `trunk-${i}` }));
+    leftEvents.forEach(  (ev, i) => list.push({ ev, x: 0, y: leftY(i),  key: `left-${i}`  }));
+    rightEvents.forEach( (ev, i) => list.push({ ev, x: 0, y: rightY(i), key: `right-${i}` }));
     return list;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
