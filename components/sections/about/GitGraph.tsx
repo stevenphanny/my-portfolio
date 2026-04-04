@@ -14,6 +14,7 @@ const TOP_PAD     = 20;   // px: space above first node
 const BOTTOM_PAD  = 60;   // px: space below last node
 const DOT_R          = 5;   // px: normal dot radius
 const DOT_R_FEATURED = 9;   // px: featured dot radius
+const DOT_HIT_R      = 50;  // px: invisible hit-area radius — increase for easier targeting
 
 // ── Label tuning ──────────────────────────────────────────────────────────────
 // TECH_LABEL_OFFSET: px above the first Technical node — increase to push label up
@@ -104,6 +105,18 @@ function evalBezier(t: number, x0: number, y0: number, x1: number, y1: number, x
 // ── GitGraph ──────────────────────────────────────────────────────────────────
 export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | null) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Debounced leave: prevents the panel flashing closed when the pointer moves
+  // between a dot and its card (they're separate elements with a small gap).
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function nodeEnter(ev: TimelineEvent) {
+    if (!ev.panel) return;
+    if (leaveTimer.current) { clearTimeout(leaveTimer.current); leaveTimer.current = null; }
+    onNodeHover?.(ev);
+  }
+  function nodeLeave() {
+    leaveTimer.current = setTimeout(() => onNodeHover?.(null), 60);
+  }
 
   // Measure actual pixel width so SVG coordinates are 1:1 → perfect circles
   const [svgW, setSvgW] = useState(0);
@@ -272,7 +285,7 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
         <svg
           width={svgW}
           height={svgHeight}
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0"
           style={{ overflow: "visible" }}
         >
           <defs>
@@ -340,7 +353,28 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
                 stroke={stroke}
                 strokeWidth="1.5"
                 filter={ev.weight === "featured" ? "url(#dot-glow)" : undefined}
-                style={{ transformOrigin: `${cx}px ${y}px` }}
+                style={{
+                  transformOrigin: `${cx}px ${y}px`,
+                  pointerEvents: "none",
+                }}
+              />
+            );
+          })}
+
+          {/* Hit-area circles — invisible, larger radius for easier targeting */}
+          {nodes.map(({ ev, y, key }) => {
+            if (!ev.panel) return null;
+            const cx = ev.branch === "right" ? xR : xL;
+            return (
+              <circle
+                key={`hit-${key}`}
+                cx={cx}
+                cy={y}
+                r={DOT_HIT_R}
+                fill="transparent"
+                style={{ cursor: "pointer" }}
+                onMouseEnter={() => nodeEnter(ev)}
+                onMouseLeave={nodeLeave}
               />
             );
           })}
@@ -370,7 +404,8 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
           ev={ev}
           y={y}
           cardRef={(el) => { cardRefs.current[i] = el; }}
-          onNodeHover={onNodeHover}
+          onEnter={nodeEnter}
+          onLeave={nodeLeave}
         />
       ))}
     </div>
@@ -382,12 +417,14 @@ function EventCard({
   ev,
   y,
   cardRef,
-  onNodeHover,
+  onEnter,
+  onLeave,
 }: {
   ev: TimelineEvent;
   y: number;
   cardRef: (el: HTMLDivElement | null) => void;
-  onNodeHover?: (ev: TimelineEvent | null) => void;
+  onEnter: (ev: TimelineEvent) => void;
+  onLeave: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const isRight    = ev.branch === "right";
@@ -427,8 +464,8 @@ function EventCard({
       data-branch={ev.branch}
       className={`absolute ${hasPanel ? "cursor-pointer" : ""}`}
       style={{ ...posStyle, textAlign }}
-      onMouseEnter={() => { setHovered(true);  hasPanel && onNodeHover?.(ev);   }}
-      onMouseLeave={() => { setHovered(false); hasPanel && onNodeHover?.(null); }}
+      onMouseEnter={() => { setHovered(true);  onEnter(ev); }}
+      onMouseLeave={() => { setHovered(false); onLeave();   }}
     >
       <span className="font-poppins text-[10px] tracking-[0.2em] text-cream/30 block">
         {ev.year}
