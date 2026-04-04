@@ -10,7 +10,9 @@
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_wait_for",
-      "mcp__playwright__browser_take_screenshot"
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(ls -la /c/CODING/MAC/my-portfolio/tailwind.config.* /c/CODING/MAC/my-portfolio/next.config.*)",
+      "Bash(rm:*)"
     ]
   }
 }
