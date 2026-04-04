@@ -27,6 +27,12 @@ export type TimelineEvent = {
   event: string;
   branch: Branch;
   detail?: string;
+  /**
+   * Visual weight of the node:
+   * - "featured" : larger dot + larger title — use for milestones that matter most
+   * - "normal"   : default size (omit for normal)
+   */
+  weight?: "normal" | "featured";
   /** If present, hovering this node opens the right-column panel. */
   panel?: NodePanel;
 };
@@ -52,7 +58,7 @@ export const TIMELINE: TimelineEvent[] = [
   {
     branch: "left",
     year: "2024",
-    event: "Joined Monash Assistive Tech Team (MATT)",
+    event: "Monash Assistive Tech Team (MATT)",
     detail: "My first ",
     panel: {
       images: ["/about/matt-1.jpg", "/about/matt-2.jpg"],
@@ -65,6 +71,7 @@ export const TIMELINE: TimelineEvent[] = [
     year: "2023",
     event: "Joined MAC committee",
     detail: "Monash Association of Coding",
+    weight: "featured",
     panel: {
       images: ["/about/mac-1.jpg"],
       caption: "Helping run workshops, socials, and hackathons for the coding community.",
@@ -94,6 +101,7 @@ export const TIMELINE: TimelineEvent[] = [
     year: "2025",
     event: "Hackathon finalist",
     detail: "24 h build · top 5 team",
+    weight: "featured",
     panel: {
       images: ["/about/hackathon-1.jpg", "/about/hackathon-2.jpg", "/about/hackathon-3.jpg", "/about/hackathon-4.jpg"],
       caption: "24 hours. One idea. Top 5 out of 40 teams.",
@@ -122,6 +130,7 @@ export const TIMELINE: TimelineEvent[] = [
     year: "2026",
     event: "Graduating",
     detail: "Bachelor of Software Engineering",
+    weight: "featured",
   },
   {
     branch: "left",

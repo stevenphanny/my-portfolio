@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timelineData";
@@ -11,7 +12,8 @@ gsap.registerPlugin(ScrollTrigger);
 const FORK_DROP   = ROW_HEIGHT;  // match row spacing for consistent dot gaps
 const TOP_PAD     = 20;   // px: space above first node
 const BOTTOM_PAD  = 60;   // px: space below last node
-const DOT_R       = 5;    // px: dot radius (real pixels — no viewBox distortion)
+const DOT_R          = 5;   // px: normal dot radius
+const DOT_R_FEATURED = 9;   // px: featured dot radius
 
 // ── Label tuning ──────────────────────────────────────────────────────────────
 // TECH_LABEL_OFFSET: px above the first Technical node — increase to push label up
@@ -64,21 +66,29 @@ const SCROLL = {
   CARD_MOBILE_SCRUB:  0.5,
 };
 
-// X as fractions of container width
-// Trunk continues down as the left (technical) line.
-// Life branch forks off to the right.
+// ── Branch line positions (fractions of container width) ─────────────────────
 const X_LEFT  = 0.32;  // trunk / technical line
-const X_RIGHT = 0.68;  // extracurricular branch
+const X_RIGHT = 0.68;  // life branch
 
-// Card zones (CSS % of container)
-// "main"  → between the two lines
-const CARD_MAIN_LEFT   = X_LEFT  + 0.04;   // 36%
-const CARD_MAIN_RIGHT  = X_RIGHT - 0.04;   // 64%
-// "left"  → to the LEFT of X_LEFT (right edge of card aligned near line)
-const CARD_LEFT_END    = X_LEFT  - 0.02;   // 30%
-const CARD_LEFT_WIDTH  = 0.28;             // 28% wide → left edge at ~2%
-// "right" → to the RIGHT of X_RIGHT
-const CARD_RIGHT_START = X_RIGHT + 0.02;   // 70%
+// ── Card layout ───────────────────────────────────────────────────────────────
+// All values are fractions of container width (0–1).
+const CARD = {
+  // Clearance between a branch line and the nearest card edge.
+  // Increase if large (featured) dots overlap card text.
+  GAP_LEFT:   0.04,  // X_LEFT  → right edge of left-branch cards
+  GAP_RIGHT:  0.05,  // X_RIGHT → left edge of right-branch cards
+  // Width of left-branch cards (they extend leftward from their right edge).
+  LEFT_WIDTH: 0.40,
+  // Inset from each line toward the centre for "main" branch cards.
+  MAIN_INSET: 0.04,
+};
+
+// Derived card edges — edit CARD above, not these.
+const CARD_LEFT_END    = X_LEFT  - CARD.GAP_LEFT;   // right edge of left cards
+const CARD_LEFT_WIDTH  = CARD.LEFT_WIDTH;
+const CARD_RIGHT_START = X_RIGHT + CARD.GAP_RIGHT;  // left edge of right cards
+const CARD_MAIN_LEFT   = X_LEFT  + CARD.MAIN_INSET;
+const CARD_MAIN_RIGHT  = X_RIGHT - CARD.MAIN_INSET;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function nodeY(idx: number) { return TOP_PAD + idx * ROW_HEIGHT; }
@@ -265,6 +275,16 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
           className="absolute inset-0 pointer-events-none"
           style={{ overflow: "visible" }}
         >
+          <defs>
+            {/* Glow filter for featured nodes — stdDeviation controls spread */}
+            <filter id="dot-glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
           {/* Guide lines (dim track) */}
           <line x1={xL} y1={TOP_PAD} x2={xL} y2={lastTrunkY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
           <line x1={xL} y1={lastTrunkY} x2={xL} y2={forkEndY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
@@ -304,17 +324,22 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
 
           {/* Dots — real pixel coords, no viewBox → perfect circles */}
           {nodes.map(({ ev, y, key }, i) => {
-            const cx = ev.branch === "right" ? xR : xL;
+            const cx       = ev.branch === "right" ? xR : xL;
+            const r        = ev.weight === "featured" ? DOT_R_FEATURED : DOT_R;
+            const stroke   = ev.weight === "featured"
+              ? "rgba(252,237,211,0.85)"
+              : "rgba(252,237,211,0.55)";
             return (
               <circle
                 key={key}
                 ref={(el) => { dotRefs.current[i] = el; }}
                 cx={cx}
                 cy={y}
-                r={DOT_R}
+                r={r}
                 fill="#002147"
-                stroke="rgba(252,237,211,0.55)"
+                stroke={stroke}
                 strokeWidth="1.5"
+                filter={ev.weight === "featured" ? "url(#dot-glow)" : undefined}
                 style={{ transformOrigin: `${cx}px ${y}px` }}
               />
             );
@@ -364,8 +389,10 @@ function EventCard({
   cardRef: (el: HTMLDivElement | null) => void;
   onNodeHover?: (ev: TimelineEvent | null) => void;
 }) {
+  const [hovered, setHovered] = useState(false);
   const isRight    = ev.branch === "right";
   const hasPanel   = Boolean(ev.panel);
+  const isFeatured = ev.weight === "featured";
 
   // "left"  → sits to the LEFT of the technical line, right-aligned text
   // "right" → sits to the RIGHT of the life branch, left-aligned text
@@ -388,21 +415,36 @@ function EventCard({
     };
   }
 
+  const titleColor = "text-cream";
+  // Featured nodes get a slightly larger title.
+  const titleSize  = ev.branch === "main"
+    ? (isFeatured ? "text-2xl"    : "text-xl")
+    : (isFeatured ? "text-[20px]" : "text-[17px]");
+
   return (
     <div
       ref={cardRef}
       data-branch={ev.branch}
-      className={`absolute transition-opacity duration-200 ${hasPanel ? "cursor-pointer" : ""}`}
+      className={`absolute ${hasPanel ? "cursor-pointer" : ""}`}
       style={{ ...posStyle, textAlign }}
-      onMouseEnter={() => hasPanel && onNodeHover?.(ev)}
-      onMouseLeave={() => hasPanel && onNodeHover?.(null)}
+      onMouseEnter={() => { setHovered(true);  hasPanel && onNodeHover?.(ev);   }}
+      onMouseLeave={() => { setHovered(false); hasPanel && onNodeHover?.(null); }}
     >
       <span className="font-poppins text-[10px] tracking-[0.2em] text-cream/30 block">
         {ev.year}
       </span>
-      <p className={`font-instrument-serif mt-0.5 text-cream leading-snug ${ev.branch === "main" ? "text-xl" : "text-[17px]"}`}>
+      <p className={`font-instrument-serif mt-0.5 leading-snug ${titleColor} ${titleSize}`}>
         {ev.event}
       </p>
+      {/* Underline wipe — only on hoverable nodes, matches site divider animation */}
+      {hasPanel && (
+        <motion.div
+          className="h-px bg-cream/50 mt-1"
+          style={{ originX: isRight ? 0 : 1 }}
+          animate={{ scaleX: hovered ? 1 : 0 }}
+          transition={{ duration: 0.3, ease: [0.25, 0, 0, 1] }}
+        />
+      )}
       {ev.detail && (
         <p className="font-lora text-xs text-cream/40 mt-1 leading-relaxed">
           {ev.detail}
