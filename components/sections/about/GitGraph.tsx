@@ -33,7 +33,7 @@ const SCROLL = {
   // Fraction of scroll range devoted to the fork drawing (larger = fork draws over more scroll)
   FORK_WINDOW:        0.5,
   // When branch lines finish drawing — decrease % to finish earlier (e.g. "bottom 35%")
-  BRANCHES_END:       "bottom 25%",
+  BRANCHES_END:       "bottom 50%",
   // Scrub smoothness for lines: 0 = instant snap, higher = more lag/smoothness
   LINE_SCRUB:         0.4,
 
@@ -92,7 +92,7 @@ function evalBezier(t: number, x0: number, y0: number, x1: number, y1: number, x
 }
 
 // ── GitGraph ──────────────────────────────────────────────────────────────────
-export function GitGraph() {
+export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | null) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Measure actual pixel width so SVG coordinates are 1:1 → perfect circles
@@ -345,6 +345,7 @@ export function GitGraph() {
           ev={ev}
           y={y}
           cardRef={(el) => { cardRefs.current[i] = el; }}
+          onNodeHover={onNodeHover}
         />
       ))}
     </div>
@@ -356,13 +357,15 @@ function EventCard({
   ev,
   y,
   cardRef,
+  onNodeHover,
 }: {
   ev: TimelineEvent;
   y: number;
   cardRef: (el: HTMLDivElement | null) => void;
+  onNodeHover?: (ev: TimelineEvent | null) => void;
 }) {
-  const isRight = ev.branch === "right";
-  const isLeft  = ev.branch === "left";
+  const isRight    = ev.branch === "right";
+  const hasPanel   = Boolean(ev.panel);
 
   // "left"  → sits to the LEFT of the technical line, right-aligned text
   // "right" → sits to the RIGHT of the life branch, left-aligned text
@@ -389,8 +392,10 @@ function EventCard({
     <div
       ref={cardRef}
       data-branch={ev.branch}
-      className="absolute"
+      className={`absolute transition-opacity duration-200 ${hasPanel ? "cursor-pointer" : ""}`}
       style={{ ...posStyle, textAlign }}
+      onMouseEnter={() => hasPanel && onNodeHover?.(ev)}
+      onMouseLeave={() => hasPanel && onNodeHover?.(null)}
     >
       <span className="font-poppins text-[10px] tracking-[0.2em] text-cream/30 block">
         {ev.year}
