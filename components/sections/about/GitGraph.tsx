@@ -21,7 +21,7 @@ const DOT_HIT_R      = 50;  // px: invisible hit-area radius — increase for ea
 const TECH_LABEL_OFFSET = 63;
 // LIFE_LABEL_T: position along the fork bezier (0 = top of curve, 1 = first Life node)
 // decrease to move label higher/further up the curve; increase to move it closer to the node
-const LIFE_LABEL_T = 0.72;
+const LIFE_LABEL_T = 0.81;
 
 // ── Scroll animation config ───────────────────────────────────────────────────
 const SCROLL = {
