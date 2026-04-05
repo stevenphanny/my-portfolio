@@ -213,10 +213,6 @@ export function VenetianSection() {
         className="h-px w-full bg-navy/15 mb-16"
       />
 
-      <p className="font-poppins text-xs tracking-[0.3em] uppercase text-navy/30 mb-4">
-        Concept G — Venetian Blind
-      </p>
-
       <div className="overflow-hidden mb-16">
         <motion.h2
           variants={headingVariants}

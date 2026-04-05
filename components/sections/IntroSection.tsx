@@ -6,7 +6,6 @@ const HERO_DELAY = 5.7;
 
 // ── Entry variants ─────────────────────────────────────────────────────────────
 
-// Row 1 — clip-reveal upward, slow and weighty
 const row1Variants = {
   hidden: { clipPath: "inset(0 0 100% 0)", y: 24 },
   show: {
@@ -20,7 +19,6 @@ const row1Variants = {
   },
 };
 
-// Rows 2 & 3 and CTA — slow fade + gentle rise
 const makeFadeUp = (extraDelay: number) => ({
   hidden: { opacity: 0, y: 20 },
   show: {
@@ -39,10 +37,8 @@ const row2Variants = makeFadeUp(0.3);
 // ── Proximity hover: letters near the cursor rise proportionally ──────────────
 const HERO_NAME = "Steven Phan";
 const HERO_HANDLE = "@stevenphanny";
-// Radius in px — letters within this distance from the cursor are affected
 const NAME_RADIUS = 100;
 const HANDLE_RADIUS = 18;
-// Max raise in em — scales with font size so it stays proportional
 const MAX_RAISE_EM = 0.08;
 
 function HeroLetter({
@@ -50,41 +46,39 @@ function HeroLetter({
   index,
   cursorX,
   radius,
+  enableEffect,
 }: {
   char: string;
   index: number;
   cursorX: MotionValue<number>;
   radius: number;
+  enableEffect: boolean;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const rawY = useMotionValue(0);
-  // stiffness: how aggressively the spring snaps to target (higher = faster)
-  // damping: how quickly oscillation settles (lower = bouncier)
   const y = useSpring(rawY, { stiffness: 250, damping: 20 });
 
   useEffect(() => {
-    if (char === " ") return;
+    if (!enableEffect || char === " ") return;
     return cursorX.on("change", (cx) => {
       const el = ref.current;
       if (!el || cx === -1) { rawY.set(0); return; }
-      // Get letter center x relative to viewport
       const rect = el.getBoundingClientRect();
       const letterCenter = rect.left + rect.width / 2;
       const dist = Math.abs(cx - letterCenter);
       if (dist > radius) { rawY.set(0); return; }
-      // Cosine falloff: smooth bell curve from 1 (at cursor) to 0 (at radius edge)
       const strength = Math.cos((dist / radius) * (Math.PI / 2));
       const fontSize = parseFloat(getComputedStyle(el).fontSize);
       rawY.set(-strength * MAX_RAISE_EM * fontSize);
     });
-  }, [char, cursorX, rawY, radius]);
+  }, [char, cursorX, rawY, radius, enableEffect]);
 
   if (char === " ") {
     return <span className="inline-block w-[0.25em]">&nbsp;</span>;
   }
 
   return (
-    <motion.span ref={ref} className="inline-block cursor-default" style={{ y }}>
+    <motion.span ref={ref} className="inline-block" style={{ y }}>
       {char}
     </motion.span>
   );
@@ -93,13 +87,20 @@ function HeroLetter({
 // ── IntroSection ───────────────────────────────────────────────────────────────
 export function IntroSection() {
   const { scrollY } = useScroll();
-  // Track cursor x — separate motion values so each row is independent
   const cursorX = useMotionValue(-1);
   const cursorX2 = useMotionValue(-1);
 
-  // No useSpring — Lenis already smooths scroll, double-smoothing felt wrong
   const row1X = useTransform(scrollY, [0, 600], [-10, 60]);
   const row2X = useTransform(scrollY, [0, 600], [10, -40]);
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const [indicatorVisible, setIndicatorVisible] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -133,38 +134,38 @@ export function IntroSection() {
       />
 
       {/* ── Row 1: Steven Phan ───────────────────────────────────────────── */}
-      <motion.div className="overflow-hidden" style={{ x: row1X }}>
+      <motion.div className="overflow-hidden" style={isMobile ? {} : { x: row1X }}>
         <motion.h1
           variants={row1Variants}
           initial="hidden"
           animate="show"
           className="font-instrument-serif text-cream leading-none tracking-tight flex"
           style={{ fontSize: "clamp(4rem, 13vw, 14rem)" }}
-          onMouseMove={(e) => cursorX.set(e.clientX)}
-          onMouseLeave={() => cursorX.set(-1)}
+          onMouseMove={isMobile ? undefined : (e) => cursorX.set(e.clientX)}
+          onMouseLeave={isMobile ? undefined : () => cursorX.set(-1)}
         >
           {HERO_NAME.split("").map((char, i) => (
-            <HeroLetter key={i} char={char} index={i} cursorX={cursorX} radius={NAME_RADIUS} />
+            <HeroLetter key={i} char={char} index={i} cursorX={cursorX} radius={NAME_RADIUS} enableEffect={!isMobile} />
           ))}
         </motion.h1>
       </motion.div>
 
-      {/* ── Rows 2 & 3: move together ────────────────────────────────────── */}
+      {/* ── Row 2: @stevenphanny ─────────────────────────────────────────── */}
       <motion.div
-        style={{ x: row2X }}
-      className="flex flex-col items-center gap-1"
+        style={isMobile ? {} : { x: row2X }}
+        className="flex flex-col items-center gap-1"
       >
         <motion.p
           variants={row2Variants}
           initial="hidden"
           animate="show"
           className="font-instrument-serif tracking-tight text-tan flex"
-          style={{ fontSize: "clamp(0.8rem, 2.6vw, 2.8rem)" }}
-          onMouseMove={(e) => cursorX2.set(e.clientX)}
-          onMouseLeave={() => cursorX2.set(-1)}
+          style={{ fontSize: "clamp(1.1rem, 2.6vw, 2.8rem)" }}
+          onMouseMove={isMobile ? undefined : (e) => cursorX2.set(e.clientX)}
+          onMouseLeave={isMobile ? undefined : () => cursorX2.set(-1)}
         >
           {HERO_HANDLE.split("").map((char, i) => (
-            <HeroLetter key={i} char={char} index={i} cursorX={cursorX2} radius={HANDLE_RADIUS} />
+            <HeroLetter key={i} char={char} index={i} cursorX={cursorX2} radius={HANDLE_RADIUS} enableEffect={!isMobile} />
           ))}
         </motion.p>
       </motion.div>
