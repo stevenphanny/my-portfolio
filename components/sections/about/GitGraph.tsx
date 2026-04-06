@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timelineData";
@@ -10,10 +10,10 @@ gsap.registerPlugin(ScrollTrigger);
 
 // ── Layout constants ──────────────────────────────────────────────────────────
 const FORK_DROP   = ROW_HEIGHT;  // match row spacing for consistent dot gaps
-const TOP_PAD     = 20;   // px: space above first node
-const BOTTOM_PAD  = 60;   // px: space below last node
+const TOP_PAD     = 10;   // px: space above first node
+const BOTTOM_PAD  = 400;   // px: space below last node
 const DOT_R          = 5;   // px: normal dot radius
-const DOT_R_FEATURED = 9;   // px: featured dot radius
+const DOT_R_FEATURED = 10;   // px: featured dot radius
 const DOT_HIT_R      = 50;  // px: invisible hit-area radius — increase for easier targeting
 
 // ── Label tuning ──────────────────────────────────────────────────────────────
@@ -35,15 +35,17 @@ const SCROLL = {
   FORK_SPREAD:        52,
   // Fraction of scroll range devoted to the fork drawing (larger = fork draws over more scroll)
   FORK_WINDOW:        0.5,
-  // When branch lines finish drawing — decrease % to finish earlier (e.g. "bottom 35%")
-  BRANCHES_END:       "bottom 50%",
+  // When branch lines finish drawing — decrease % to finish scrolling earlier than the lines reach the nodes (e.g. "bottom 35%")
+  BRANCHES_END:       "bottom 90%",
   // Scrub smoothness for lines: 0 = instant snap, higher = more lag/smoothness
   LINE_SCRUB:         0.4,
 
   // ── Dots ───────────────────────────────────────────────────────────────────
+  // Eg top 1% means the animation starts when the top of the dot reaches the top edge of the screen
+  // Eg top
   DOT_FADE_START:     "top 85%",  // dot starts fading in
-  DOT_FADE_END:       "top 68%",  // dot fully visible
-  DOT_FILL_START:     "top 68%",  // dot fill (cream) starts
+  DOT_FADE_END:       "top 50%",  // dot fully visible
+  DOT_FILL_START:     "top 40%",  // dot fill (cream) starts
   DOT_FILL_END:       "top 52%",  // dot fill completes
   DOT_SCRUB:          0.3,
 
@@ -77,7 +79,7 @@ const CARD = {
   // Clearance between a branch line and the nearest card edge.
   // Increase if large (featured) dots overlap card text.
   GAP_LEFT:   0.04,  // X_LEFT  → right edge of left-branch cards
-  GAP_RIGHT:  0.05,  // X_RIGHT → left edge of right-branch cards
+  GAP_RIGHT:  0.04,  // X_RIGHT → left edge of right-branch cards
   // Width of left-branch cards (they extend leftward from their right edge).
   LEFT_WIDTH: 0.40,
   // Inset from each line toward the centre for "main" branch cards.
@@ -102,20 +104,58 @@ function evalBezier(t: number, x0: number, y0: number, x1: number, y1: number, x
   };
 }
 
+// ── Lock / Unlock icons ───────────────────────────────────────────────────────
+function LockedIcon() {
+  return (
+    <svg width="13" height="16" viewBox="0 0 13 16" fill="none" className="text-navy drop-shadow-sm">
+      <rect x="1.5" y="7" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M3.5 7V4.5a3 3 0 0 1 6 0V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="6.5" cy="11" r="1.2" fill="currentColor"/>
+    </svg>
+  );
+}
+
+function UnlockedIcon() {
+  return (
+    <svg width="13" height="16" viewBox="0 0 13 16" fill="none" className="text-navy/60 drop-shadow-sm">
+      <rect x="1.5" y="7" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M3.5 7V4.5a3 3 0 0 1 6 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="6.5" cy="11" r="1.2" fill="currentColor"/>
+    </svg>
+  );
+}
+
 // ── GitGraph ──────────────────────────────────────────────────────────────────
-export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | null) => void }) {
+export function GitGraph({
+  onNodeHover,
+  lockedEvent,
+  onNodeClick,
+}: {
+  onNodeHover?: (ev: TimelineEvent | null) => void;
+  lockedEvent?: TimelineEvent | null;
+  onNodeClick?: (ev: TimelineEvent) => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Debounced leave: prevents the panel flashing closed when the pointer moves
   // between a dot and its card (they're separate elements with a small gap).
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [hoveredFeaturedId, setHoveredFeaturedId] = useState<string | null>(null);
+
+  // Unique key per node — prevents same-name nodes (e.g. two "What's next...") from colliding
+  const evId = (ev: TimelineEvent) => `${ev.branch}:${ev.event}`;
+
   function nodeEnter(ev: TimelineEvent) {
     if (!ev.panel) return;
     if (leaveTimer.current) { clearTimeout(leaveTimer.current); leaveTimer.current = null; }
     onNodeHover?.(ev);
+    if (ev.weight === "featured") setHoveredFeaturedId(evId(ev));
   }
   function nodeLeave() {
-    leaveTimer.current = setTimeout(() => onNodeHover?.(null), 60);
+    leaveTimer.current = setTimeout(() => {
+      onNodeHover?.(null);
+      setHoveredFeaturedId(null);
+    }, 60);
   }
 
   // Measure actual pixel width so SVG coordinates are 1:1 → perfect circles
@@ -209,13 +249,26 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
       const forkS = `top ${SCROLL.FORK_BASE - trunkFrac * SCROLL.FORK_SPREAD}%`;
       const forkE = `top ${SCROLL.FORK_BASE - (trunkFrac + SCROLL.FORK_WINDOW) * SCROLL.FORK_SPREAD}%`;
 
-      // 1. Trunk line draws until fork begins
-      gsap.to(trunkLineRef.current, {
-        strokeDashoffset: 0, ease: "none",
+      // Dots start cream (already set in JSX); no initial opacity override needed
+
+      const DOT_FADE   = 0.05;  // fraction of parent timeline over which each dot fills in
+      const trunkSpan  = lastTrunkY - TOP_PAD;
+      const branchSpan = lastBranchY - forkEndY;
+
+      // 1. Trunk timeline: line draws + each dot fills navy as the line reaches its node
+      const trunkTL = gsap.timeline({
         scrollTrigger: { trigger, start: SCROLL.TRUNK_START, end: forkS, scrub: SCROLL.LINE_SCRUB },
       });
+      trunkTL.to(trunkLineRef.current, { strokeDashoffset: 0, ease: "none", duration: 1 }, 0);
+      trunkEvents.forEach((_ev, i) => {
+        const dotEl = dotRefs.current[i];
+        if (!dotEl) return;
+        const fraction = trunkSpan > 0 ? (nodeY(i) - TOP_PAD) / trunkSpan : 0;
+        trunkTL.fromTo(dotEl, { attr: { fill: "#fcedd3" } }, { attr: { fill: "#002147" }, ease: "none", duration: DOT_FADE },
+          Math.min(1 - DOT_FADE, fraction));
+      });
 
-      // 2. Left drop (straight connector on xL) + fork bezier draw together
+      // 2. Left drop + fork bezier draw together (no nodes in this segment)
       gsap.to(leftDropRef.current, {
         strokeDashoffset: 0, ease: "none",
         scrollTrigger: { trigger, start: forkS, end: forkE, scrub: SCROLL.LINE_SCRUB },
@@ -225,23 +278,29 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
         scrollTrigger: { trigger, start: forkS, end: forkE, scrub: SCROLL.LINE_SCRUB },
       });
 
-      // 3. Both branch lines share identical triggers → draw in perfect sync
-      //    (they are the same length so matching start/end guarantees same speed)
-      const branchTrigger = { trigger, start: forkE, end: SCROLL.BRANCHES_END, scrub: SCROLL.LINE_SCRUB };
-      gsap.to(leftBranchLineRef.current,  { strokeDashoffset: 0, ease: "none", scrollTrigger: branchTrigger });
-      gsap.to(rightBranchLineRef.current, { strokeDashoffset: 0, ease: "none", scrollTrigger: branchTrigger });
+      // 3. Branch timeline: both lines draw + each dot appears as its line reaches the node.
+      //    Left and right nodes are at different Y positions so fractions differ → naturally
+      //    staggered without any hard-coded offsets.
+      const branchTL = gsap.timeline({
+        scrollTrigger: { trigger, start: forkE, end: SCROLL.BRANCHES_END, scrub: SCROLL.LINE_SCRUB },
+      });
+      branchTL.to(leftBranchLineRef.current,  { strokeDashoffset: 0, ease: "none", duration: 1 }, 0);
+      branchTL.to(rightBranchLineRef.current, { strokeDashoffset: 0, ease: "none", duration: 1 }, 0);
 
-      // 4. Dots: fade in → fill
-      dotRefs.current.forEach((dot) => {
-        if (!dot) return;
-        gsap.fromTo(dot, { opacity: 0 }, {
-          opacity: 1,
-          scrollTrigger: { trigger: dot, start: SCROLL.DOT_FADE_START, end: SCROLL.DOT_FADE_END, scrub: SCROLL.DOT_SCRUB },
-        });
-        gsap.to(dot, {
-          attr: { fill: "#002147" },
-          scrollTrigger: { trigger: dot, start: SCROLL.DOT_FILL_START, end: SCROLL.DOT_FILL_END, scrub: SCROLL.DOT_SCRUB },
-        });
+      leftEvents.forEach((_ev, i) => {
+        const dotEl = dotRefs.current[trunkEvents.length + i];
+        if (!dotEl) return;
+        const fraction = branchSpan > 0 ? (leftY(i) - forkEndY) / branchSpan : 0;
+        branchTL.fromTo(dotEl, { attr: { fill: "#fcedd3" } }, { attr: { fill: "#002147" }, ease: "none", duration: DOT_FADE },
+          Math.min(1 - DOT_FADE, fraction));
+      });
+
+      rightEvents.forEach((_ev, i) => {
+        const dotEl = dotRefs.current[trunkEvents.length + leftEvents.length + i];
+        if (!dotEl) return;
+        const fraction = branchSpan > 0 ? (rightY(i) - forkEndY) / branchSpan : 0;
+        branchTL.fromTo(dotEl, { attr: { fill: "#fcedd3" } }, { attr: { fill: "#002147" }, ease: "none", duration: DOT_FADE },
+          Math.min(1 - DOT_FADE, fraction));
       });
 
       // 5. Cards + labels
@@ -365,6 +424,7 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
           {nodes.map(({ ev, y, key }) => {
             if (!ev.panel) return null;
             const cx = ev.branch === "right" ? xR : xL;
+            const isFeaturedClickable = ev.weight === "featured";
             return (
               <circle
                 key={`hit-${key}`}
@@ -372,14 +432,64 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
                 cy={y}
                 r={DOT_HIT_R}
                 fill="transparent"
-                style={{ cursor: "pointer" }}
+                style={{ cursor: isFeaturedClickable ? "pointer" : "default" }}
                 onMouseEnter={() => nodeEnter(ev)}
                 onMouseLeave={nodeLeave}
+                onClick={() => isFeaturedClickable && onNodeClick?.(ev)}
               />
             );
           })}
         </svg>
       )}
+
+      {/* ── Lock / Unlock icons on featured nodes ── */}
+      {svgW > 0 && nodes.map(({ ev, y, key }) => {
+        if (ev.weight !== "featured" || !ev.panel) return null;
+        const cx = ev.branch === "right" ? xR : xL;
+        const isLocked   = lockedEvent != null && evId(lockedEvent) === evId(ev);
+        const isHovered  = hoveredFeaturedId === evId(ev);
+        if (!isLocked && !isHovered) return null;
+        return (
+          <div
+            key={`lock-${key}`}
+            className="absolute z-20 cursor-pointer"
+            style={{
+              left: ev.branch === "right"
+                ? cx - DOT_R_FEATURED - 4
+                : cx + DOT_R_FEATURED + 4,
+              top: y - 8,
+              transform: ev.branch === "right" ? "translateX(-100%)" : undefined,
+            }}
+            onMouseEnter={() => nodeEnter(ev)}
+            onMouseLeave={nodeLeave}
+            onClick={(e) => { e.stopPropagation(); onNodeClick?.(ev); }}
+          >
+            <AnimatePresence mode="wait">
+              {isLocked ? (
+                <motion.div
+                  key="locked"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.5, opacity: 0 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0, 0, 1] }}
+                >
+                  <LockedIcon />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="unlocked"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.5, opacity: 0 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0, 0, 1] }}
+                >
+                  <UnlockedIcon />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
 
       {/* ── Branch label nodes — pill badges centered on their branch lines ── */}
       <div

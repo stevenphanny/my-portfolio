@@ -4,8 +4,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import type { TimelineEvent, NodePanel as NodePanelData } from "./timelineData";
 
-export function NodePanel({ event }: { event: TimelineEvent | null }) {
+const PANEL_SIZE = {
+  small:  "w-[110%] min-h-[300px]",
+  medium: "w-[155%] min-h-[580px]",
+  large:  "w-[155%] min-h-[580px]",
+};
+
+export function NodePanel({ event, isLocked }: { event: TimelineEvent | null; isLocked?: boolean }) {
   const panel = event?.panel;
+  const sizeClass = PANEL_SIZE[panel?.size ?? "medium"];
 
   return (
     <AnimatePresence mode="wait">
@@ -16,7 +23,8 @@ export function NodePanel({ event }: { event: TimelineEvent | null }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.38, ease: [0.25, 0, 0, 1] }}
-          className="absolute inset-0 bg-cream flex flex-col gap-5 overflow-y-auto"
+          className={`absolute top-0 left-0 ${sizeClass} max-h-[85vh] bg-cream flex flex-col gap-5 overflow-y-auto overscroll-contain z-10${isLocked && panel?.size === "large" ? " panel-scrollbar" : ""}`}
+          onWheel={(e) => { if (isLocked && panel?.size === "large") e.stopPropagation(); }}
         >
           {/* Event header */}
           <div>

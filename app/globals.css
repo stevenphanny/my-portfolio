@@ -81,6 +81,24 @@ input:-webkit-autofill {
   -webkit-text-fill-color: #002147;
 }
 
+/* Custom navy scrollbar for locked node panels */
+.panel-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-navy) transparent;
+}
+.panel-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  display: block;
+}
+.panel-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.panel-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-navy);
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
 /* TODO for later */
 @media (prefers-reduced-motion: reduce) {
 }
