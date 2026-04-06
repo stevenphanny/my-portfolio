@@ -23,10 +23,17 @@ export const SECTION_REGISTRY: SectionProps[] = [
     Component: IntroSection,
   },
   {
-    id: "work",
-    label: "Work",
+    id: "about",
+    label: "About",
     bgClass: "bg-cream",
     navColor: "navy",
+    Component: AboutSection,
+  },
+  {
+    id: "work",
+    label: "Work",
+    bgClass: "bg-navy",
+    navColor: "cream",
     Component: VenetianSection,
   },
   {
@@ -35,13 +42,6 @@ export const SECTION_REGISTRY: SectionProps[] = [
     bgClass: "bg-cream",
     navColor: "navy",
     Component: CardDeckSection,
-  },
-  {
-    id: "about",
-    label: "About",
-    bgClass: "bg-navy",
-    navColor: "cream",
-    Component: AboutSection,
   },
   {
     id: "contact",

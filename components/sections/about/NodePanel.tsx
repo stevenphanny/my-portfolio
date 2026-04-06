@@ -16,25 +16,25 @@ export function NodePanel({ event }: { event: TimelineEvent | null }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.38, ease: [0.25, 0, 0, 1] }}
-          className="absolute inset-0 bg-navy flex flex-col gap-5 overflow-y-auto"
+          className="absolute inset-0 bg-cream flex flex-col gap-5 overflow-y-auto"
         >
           {/* Event header */}
           <div>
-            <span className="font-poppins text-[10px] tracking-[0.3em] uppercase text-cream/30">
+            <span className="font-poppins text-[10px] tracking-[0.3em] uppercase text-navy/30">
               {event!.year}
             </span>
-            <h3 className="font-instrument-serif text-4xl text-cream mt-1 leading-tight">
+            <h3 className="font-instrument-serif text-4xl text-navy mt-1 leading-tight">
               {event!.event}
             </h3>
             {event!.detail && (
-              <p className="font-poppins text-xs tracking-[0.15em] text-cream/40 mt-2">
+              <p className="font-poppins text-xs tracking-[0.15em] text-navy/40 mt-2">
                 {event!.detail}
               </p>
             )}
           </div>
 
           {/* Divider */}
-          <div className="h-px w-full bg-cream/10" />
+          <div className="h-px w-full bg-navy/10" />
 
           {/* Images */}
           {panel.images && panel.images.length > 0 && (
@@ -43,7 +43,7 @@ export function NodePanel({ event }: { event: TimelineEvent | null }) {
 
           {/* Caption */}
           {panel.caption && (
-            <p className="font-lora text-sm text-cream/55 leading-relaxed">
+            <p className="font-lora text-sm text-navy/55 leading-relaxed">
               {panel.caption}
             </p>
           )}

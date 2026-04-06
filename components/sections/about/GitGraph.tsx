@@ -239,7 +239,7 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
           scrollTrigger: { trigger: dot, start: SCROLL.DOT_FADE_START, end: SCROLL.DOT_FADE_END, scrub: SCROLL.DOT_SCRUB },
         });
         gsap.to(dot, {
-          attr: { fill: "#fcedd3" },
+          attr: { fill: "#002147" },
           scrollTrigger: { trigger: dot, start: SCROLL.DOT_FILL_START, end: SCROLL.DOT_FILL_END, scrub: SCROLL.DOT_SCRUB },
         });
       });
@@ -299,40 +299,40 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
             </filter>
           </defs>
           {/* Guide lines (dim track) */}
-          <line x1={xL} y1={TOP_PAD} x2={xL} y2={lastTrunkY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
-          <line x1={xL} y1={lastTrunkY} x2={xL} y2={forkEndY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
-          <path d={forkPath} fill="none" stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
-          <line x1={xL} y1={forkEndY} x2={xL} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
-          <line x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
+          <line x1={xL} y1={TOP_PAD} x2={xL} y2={lastTrunkY} stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
+          <line x1={xL} y1={lastTrunkY} x2={xL} y2={forkEndY} stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
+          <path d={forkPath} fill="none" stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
+          <line x1={xL} y1={forkEndY} x2={xL} y2={lastBranchY} stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
+          <line x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY} stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
 
           {/* Animated: trunk (before fork) */}
           <line ref={trunkLineRef}
             x1={xL} y1={TOP_PAD} x2={xL} y2={lastTrunkY}
-            stroke="rgba(252,237,211,0.55)" strokeWidth="1.5"
+            stroke="rgba(0,33,71,0.55)" strokeWidth="1.5"
           />
 
           {/* Animated: left drop — straight connector on xL from trunk to branch */}
           <line ref={leftDropRef}
             x1={xL} y1={lastTrunkY} x2={xL} y2={forkEndY}
-            stroke="rgba(252,237,211,0.55)" strokeWidth="1.5"
+            stroke="rgba(0,33,71,0.55)" strokeWidth="1.5"
           />
 
           {/* Animated: fork bezier to right branch */}
           <path ref={forkRef}
             d={forkPath} fill="none"
-            stroke="rgba(252,237,211,0.45)" strokeWidth="1.5"
+            stroke="rgba(0,33,71,0.45)" strokeWidth="1.5"
           />
 
           {/* Animated: left branch (after fork) — synced with right */}
           <line ref={leftBranchLineRef}
             x1={xL} y1={forkEndY} x2={xL} y2={lastBranchY}
-            stroke="rgba(252,237,211,0.55)" strokeWidth="1.5"
+            stroke="rgba(0,33,71,0.55)" strokeWidth="1.5"
           />
 
           {/* Animated: right branch (after fork) — synced with left */}
           <line ref={rightBranchLineRef}
             x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY}
-            stroke="rgba(252,237,211,0.35)" strokeWidth="1.5"
+            stroke="rgba(0,33,71,0.35)" strokeWidth="1.5"
           />
 
           {/* Dots — real pixel coords, no viewBox → perfect circles */}
@@ -340,8 +340,8 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
             const cx       = ev.branch === "right" ? xR : xL;
             const r        = ev.weight === "featured" ? DOT_R_FEATURED : DOT_R;
             const stroke   = ev.weight === "featured"
-              ? "rgba(252,237,211,0.85)"
-              : "rgba(252,237,211,0.55)";
+              ? "rgba(0,33,71,0.85)"
+              : "rgba(0,33,71,0.55)";
             return (
               <circle
                 key={key}
@@ -349,7 +349,7 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
                 cx={cx}
                 cy={y}
                 r={r}
-                fill="#002147"
+                fill="#fcedd3"
                 stroke={stroke}
                 strokeWidth="1.5"
                 filter={ev.weight === "featured" ? "url(#dot-glow)" : undefined}
@@ -384,14 +384,14 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
       {/* ── Branch label nodes — pill badges centered on their branch lines ── */}
       <div
         ref={labelLeftRef}
-        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-cream/80 bg-navy border border-cream/40 rounded px-2.5 py-1 whitespace-nowrap"
+        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-navy/80 bg-cream border border-navy/40 rounded px-2.5 py-1 whitespace-nowrap"
         style={{ left: `${X_LEFT * 100}%`, top: forkEndY - TECH_LABEL_OFFSET, transform: "translateX(-50%)" }}
       >
         Technical
       </div>
       <div
         ref={labelRightRef}
-        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-cream/80 bg-navy border border-cream/40 rounded px-2.5 py-1 whitespace-nowrap"
+        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-navy/80 bg-cream border border-navy/40 rounded px-2.5 py-1 whitespace-nowrap"
         style={{ left: lifeLabelPos.x, top: lifeLabelPos.y - 12, transform: "translateX(-50%)" }}
       >
         Life
@@ -452,7 +452,7 @@ function EventCard({
     };
   }
 
-  const titleColor = "text-cream";
+  const titleColor = "text-navy";
   // Featured nodes get a slightly larger title.
   const titleSize  = ev.branch === "main"
     ? (isFeatured ? "text-2xl"    : "text-xl")
@@ -467,7 +467,7 @@ function EventCard({
       onMouseEnter={() => { setHovered(true);  onEnter(ev); }}
       onMouseLeave={() => { setHovered(false); onLeave();   }}
     >
-      <span className="font-poppins text-[10px] tracking-[0.2em] text-cream/30 block">
+      <span className="font-poppins text-[10px] tracking-[0.2em] text-navy/30 block">
         {ev.year}
       </span>
       <p className={`font-instrument-serif mt-0.5 leading-snug ${titleColor} ${titleSize}`}>
@@ -476,14 +476,14 @@ function EventCard({
       {/* Underline wipe — only on hoverable nodes, matches site divider animation */}
       {hasPanel && (
         <motion.div
-          className="h-px bg-cream/50 mt-1"
+          className="h-px bg-navy/50 mt-1"
           style={{ originX: isRight ? 0 : 1 }}
           animate={{ scaleX: hovered ? 1 : 0 }}
           transition={{ duration: 0.3, ease: [0.25, 0, 0, 1] }}
         />
       )}
       {ev.detail && (
-        <p className="font-lora text-xs text-cream/40 mt-1 leading-relaxed">
+        <p className="font-lora text-xs text-navy/40 mt-1 leading-relaxed">
           {ev.detail}
         </p>
       )}
