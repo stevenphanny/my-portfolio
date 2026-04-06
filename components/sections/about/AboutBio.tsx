@@ -57,7 +57,7 @@ export function AboutBio() {
 
         <blockquote className="font-instrument-serif text-3xl md:text-4xl text-navy leading-snug">
           &ldquo;Say <span className="font-extrabold">Yes</span> to opportunities that{" "}
-          <span className="italic">scare you</span>. You never know where they&apos;ll lead.&rdquo;
+          <span className="italic">scare you</span>. It could change your life.&rdquo;
         </blockquote>
 
         <p className="font-lora text-base text-navy/75 leading-relaxed">

@@ -224,7 +224,7 @@ export const TIMELINE: TimelineEvent[] = [
           {" "}— <span className="font-medium">October 2026</span>.
         </>
       ),
-      layout: "grid",
+      layout: "strip",
     },
   },
   

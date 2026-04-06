@@ -16,7 +16,7 @@ export function NodePanel({ event }: { event: TimelineEvent | null }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.38, ease: [0.25, 0, 0, 1] }}
-          className="absolute inset-0 bg-cream flex flex-col gap-5 overflow-y-auto"
+          className="absolute top-0 left-0 w-[155%] min-h-[580px] max-h-[85vh] bg-cream flex flex-col gap-5 overflow-y-auto z-10"
         >
           {/* Event header */}
           <div>
