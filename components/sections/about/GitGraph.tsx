@@ -4,16 +4,16 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timelineData";
+import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timelineData.tsx";
 
 gsap.registerPlugin(ScrollTrigger);
 
 // ── Layout constants ──────────────────────────────────────────────────────────
 const FORK_DROP   = ROW_HEIGHT;  // match row spacing for consistent dot gaps
-const TOP_PAD     = 20;   // px: space above first node
-const BOTTOM_PAD  = 60;   // px: space below last node
+const TOP_PAD     = 10;   // px: space above first node
+const BOTTOM_PAD  = 0;   // px: space below last node
 const DOT_R          = 5;   // px: normal dot radius
-const DOT_R_FEATURED = 9;   // px: featured dot radius
+const DOT_R_FEATURED = 10;   // px: featured dot radius
 const DOT_HIT_R      = 50;  // px: invisible hit-area radius — increase for easier targeting
 
 // ── Label tuning ──────────────────────────────────────────────────────────────
@@ -41,9 +41,11 @@ const SCROLL = {
   LINE_SCRUB:         0.4,
 
   // ── Dots ───────────────────────────────────────────────────────────────────
+  // Eg top 1% means the animation starts when the top of the dot reaches the top edge of the screen
+  // Eg top
   DOT_FADE_START:     "top 85%",  // dot starts fading in
   DOT_FADE_END:       "top 68%",  // dot fully visible
-  DOT_FILL_START:     "top 68%",  // dot fill (cream) starts
+  DOT_FILL_START:     "top 50%",  // dot fill (cream) starts
   DOT_FILL_END:       "top 52%",  // dot fill completes
   DOT_SCRUB:          0.3,
 
@@ -77,7 +79,7 @@ const CARD = {
   // Clearance between a branch line and the nearest card edge.
   // Increase if large (featured) dots overlap card text.
   GAP_LEFT:   0.04,  // X_LEFT  → right edge of left-branch cards
-  GAP_RIGHT:  0.05,  // X_RIGHT → left edge of right-branch cards
+  GAP_RIGHT:  0.04,  // X_RIGHT → left edge of right-branch cards
   // Width of left-branch cards (they extend leftward from their right edge).
   LEFT_WIDTH: 0.40,
   // Inset from each line toward the centre for "main" branch cards.

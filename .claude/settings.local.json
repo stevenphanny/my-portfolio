@@ -14,7 +14,8 @@
       "Bash(ls -la /c/CODING/MAC/my-portfolio/tailwind.config.* /c/CODING/MAC/my-portfolio/next.config.*)",
       "Bash(rm:*)",
       "Bash(find 'C:\\\\LOCAL CODING FILE\\\\MAC\\\\my-portfolio' -type f -name *timeline* -o -name *journey*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(python3:*)"
     ]
   }
 }

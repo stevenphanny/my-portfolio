@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import type { TimelineEvent, NodePanel as NodePanelData } from "./timelineData";
+import type { TimelineEvent, NodePanel as NodePanelData } from "./timelineData.tsx";
 
 export function NodePanel({ event }: { event: TimelineEvent | null }) {
   const panel = event?.panel;

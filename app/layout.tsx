@@ -49,7 +49,7 @@ export default function RootLayout({
       <body
         className={`${lora.variable} ${poppins.variable} ${ballet.variable} ${instrumentSerif.className} tracking-wider antialiased`}
       >
-      <LoadingScreen />
+      {/* <LoadingScreen /> */}
       <CustomCursor />
       <LenisProvider>
         <StripeScrollIndicator />
