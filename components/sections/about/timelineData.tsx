@@ -22,6 +22,13 @@ export type NodePanel = {
    * - "strip" : images side by side in a scrollable row
    */
   layout?: "hero" | "grid" | "strip";
+  /**
+   * Panel size:
+   * - "small"  : compact panel
+   * - "medium" : default size
+   * - "large"  : extra space (for many images or long captions)
+   */
+  size?: "small" | "medium" | "large";
 };
 
 export type TimelineEvent = {
@@ -154,6 +161,7 @@ export const TIMELINE: TimelineEvent[] = [
         </>
       ),
       layout: "strip",
+      size: "small",
     },
   },
   {
@@ -174,6 +182,7 @@ export const TIMELINE: TimelineEvent[] = [
         </>
       ),
       layout: "grid",
+      size: "large",
     },
   },
   {
@@ -186,7 +195,7 @@ export const TIMELINE: TimelineEvent[] = [
       images: ["/about/climbing-1.jpg", "/about/climbing-2.jpg"],
       caption: (
         <>
-          <span className="font-instrument-serif font-extrabold italic text-xl leading-snug mb-4 block">&ldquo;There&apos;s no such thing as a perfect moment&rdquo;</span>
+          <span className="font-instrument-serif font-extrabold italic text-xl leading-snug mb-4 block">&ldquo;There&apos;s no such thing as a perfect moment&rdquo; - Edward Chan</span>
 
           After watching Eddie&apos;s video on the{" "}
           <span className="font-bold text-navy ">butterfly effect</span>, and how a single{" "}

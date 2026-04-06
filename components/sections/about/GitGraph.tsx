@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timelineData";
@@ -104,20 +104,58 @@ function evalBezier(t: number, x0: number, y0: number, x1: number, y1: number, x
   };
 }
 
+// ── Lock / Unlock icons ───────────────────────────────────────────────────────
+function LockedIcon() {
+  return (
+    <svg width="13" height="16" viewBox="0 0 13 16" fill="none" className="text-navy drop-shadow-sm">
+      <rect x="1.5" y="7" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M3.5 7V4.5a3 3 0 0 1 6 0V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="6.5" cy="11" r="1.2" fill="currentColor"/>
+    </svg>
+  );
+}
+
+function UnlockedIcon() {
+  return (
+    <svg width="13" height="16" viewBox="0 0 13 16" fill="none" className="text-navy/60 drop-shadow-sm">
+      <rect x="1.5" y="7" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M3.5 7V4.5a3 3 0 0 1 6 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="6.5" cy="11" r="1.2" fill="currentColor"/>
+    </svg>
+  );
+}
+
 // ── GitGraph ──────────────────────────────────────────────────────────────────
-export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | null) => void }) {
+export function GitGraph({
+  onNodeHover,
+  lockedEvent,
+  onNodeClick,
+}: {
+  onNodeHover?: (ev: TimelineEvent | null) => void;
+  lockedEvent?: TimelineEvent | null;
+  onNodeClick?: (ev: TimelineEvent) => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Debounced leave: prevents the panel flashing closed when the pointer moves
   // between a dot and its card (they're separate elements with a small gap).
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [hoveredFeaturedId, setHoveredFeaturedId] = useState<string | null>(null);
+
+  // Unique key per node — prevents same-name nodes (e.g. two "What's next...") from colliding
+  const evId = (ev: TimelineEvent) => `${ev.branch}:${ev.event}`;
+
   function nodeEnter(ev: TimelineEvent) {
     if (!ev.panel) return;
     if (leaveTimer.current) { clearTimeout(leaveTimer.current); leaveTimer.current = null; }
     onNodeHover?.(ev);
+    if (ev.weight === "featured") setHoveredFeaturedId(evId(ev));
   }
   function nodeLeave() {
-    leaveTimer.current = setTimeout(() => onNodeHover?.(null), 60);
+    leaveTimer.current = setTimeout(() => {
+      onNodeHover?.(null);
+      setHoveredFeaturedId(null);
+    }, 60);
   }
 
   // Measure actual pixel width so SVG coordinates are 1:1 → perfect circles
@@ -386,6 +424,7 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
           {nodes.map(({ ev, y, key }) => {
             if (!ev.panel) return null;
             const cx = ev.branch === "right" ? xR : xL;
+            const isFeaturedClickable = ev.weight === "featured";
             return (
               <circle
                 key={`hit-${key}`}
@@ -393,14 +432,64 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
                 cy={y}
                 r={DOT_HIT_R}
                 fill="transparent"
-                style={{ cursor: "pointer" }}
+                style={{ cursor: isFeaturedClickable ? "pointer" : "default" }}
                 onMouseEnter={() => nodeEnter(ev)}
                 onMouseLeave={nodeLeave}
+                onClick={() => isFeaturedClickable && onNodeClick?.(ev)}
               />
             );
           })}
         </svg>
       )}
+
+      {/* ── Lock / Unlock icons on featured nodes ── */}
+      {svgW > 0 && nodes.map(({ ev, y, key }) => {
+        if (ev.weight !== "featured" || !ev.panel) return null;
+        const cx = ev.branch === "right" ? xR : xL;
+        const isLocked   = lockedEvent != null && evId(lockedEvent) === evId(ev);
+        const isHovered  = hoveredFeaturedId === evId(ev);
+        if (!isLocked && !isHovered) return null;
+        return (
+          <div
+            key={`lock-${key}`}
+            className="absolute z-20 cursor-pointer"
+            style={{
+              left: ev.branch === "right"
+                ? cx - DOT_R_FEATURED - 4
+                : cx + DOT_R_FEATURED + 4,
+              top: y - 8,
+              transform: ev.branch === "right" ? "translateX(-100%)" : undefined,
+            }}
+            onMouseEnter={() => nodeEnter(ev)}
+            onMouseLeave={nodeLeave}
+            onClick={(e) => { e.stopPropagation(); onNodeClick?.(ev); }}
+          >
+            <AnimatePresence mode="wait">
+              {isLocked ? (
+                <motion.div
+                  key="locked"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.5, opacity: 0 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0, 0, 1] }}
+                >
+                  <LockedIcon />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="unlocked"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.5, opacity: 0 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0, 0, 1] }}
+                >
+                  <UnlockedIcon />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
 
       {/* ── Branch label nodes — pill badges centered on their branch lines ── */}
       <div
