@@ -59,19 +59,21 @@ export function AboutBio() {
         </p>
 
         <blockquote className="font-instrument-serif text-3xl md:text-4xl text-navy leading-snug">
-          &ldquo;Building things that feel as good as they look.&rdquo;
+          &ldquo;Say <span className="font-extrabold" >Yes</span> {" "}  to opportunities that scare you. You never know where they'll lead you&rdquo;
         </blockquote>
 
         <p className="font-lora text-base text-navy/75 leading-relaxed">
           I&apos;m a Software Engineering student with a deep interest in
-          full-stack development and thoughtful UI design. I care about the
-          craft — the details in motion, the weight of typography, and the
-          feeling of using something well-made.
+          full-stack development and thoughtful UI design. 
+          <br></br>
+          <br></br>
+          <span className="prev">I care about the
+          experience - the details in motion, the weight of typography, and the
+          feeling of using something well-made.</span>
         </p>
 
         <p className="font-lora text-base text-navy/75 leading-relaxed">
-          When I&apos;m not building, I&apos;m studying how good products work
-          and thinking about how to make the next thing a little bit better.
+          When I&apos;m not coding, I love cooking, rating new restuarants, running, gyming, and hanging out with friends.
         </p>
       </motion.div>
     </div>

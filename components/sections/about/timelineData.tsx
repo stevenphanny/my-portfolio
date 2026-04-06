@@ -122,9 +122,7 @@ export const TIMELINE: TimelineEvent[] = [
       ),
       layout: "hero",
     },
-
   },
- 
 
   // ============================Right branch
   {
@@ -169,7 +167,7 @@ export const TIMELINE: TimelineEvent[] = [
       images: ["/about/climbing-1.jpg", "/about/climbing-2.jpg"],
       caption: (
         <>
-          <p className="font-instrument-serif font-extrabold italic text-xl leading-snug mb-4">&ldquo;There&apos;s no such thing as a perfect moment&rdquo;</p>
+          <span className="font-instrument-serif font-extrabold italic text-xl leading-snug mb-4 block">&ldquo;There&apos;s no such thing as a perfect moment&rdquo;</span>
 
           After watching Eddie&apos;s video on the{" "}
           <span className="font-bold text-navy ">butterfly effect</span>, and how a single{" "}
@@ -187,8 +185,22 @@ export const TIMELINE: TimelineEvent[] = [
   },
   {
     branch: "right",
-    year: "2026",
-    event: "What's next",
-    detail: "The adventure continues…",
+    year: "2026 - Present",
+    event: "What's next...",
+    detail: "",
+    weight: "featured",
+    panel: {
+      caption: (
+        <>
+          - Stop losing money because of my car (crash and tow away)
+          - Make more money so I can cook more and try more restaurants and bakeries
+          - Run my first Marathon at the Nike Melbourne Marathon Festival Oct. 2026
+          
+        </>
+      ),
+      layout: "hero",
+    },
   },
+  
+  
 ];
