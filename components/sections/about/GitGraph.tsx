@@ -35,8 +35,8 @@ const SCROLL = {
   FORK_SPREAD:        52,
   // Fraction of scroll range devoted to the fork drawing (larger = fork draws over more scroll)
   FORK_WINDOW:        0.5,
-  // When branch lines finish drawing — decrease % to finish earlier (e.g. "bottom 35%")
-  BRANCHES_END:       "bottom 50%",
+  // When branch lines finish drawing — decrease % to finish scrolling earlier than the lines reach the nodes (e.g. "bottom 35%")
+  BRANCHES_END:       "bottom 90%",
   // Scrub smoothness for lines: 0 = instant snap, higher = more lag/smoothness
   LINE_SCRUB:         0.4,
 
