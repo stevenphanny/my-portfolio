@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timelineData";
@@ -11,14 +12,16 @@ gsap.registerPlugin(ScrollTrigger);
 const FORK_DROP   = ROW_HEIGHT;  // match row spacing for consistent dot gaps
 const TOP_PAD     = 20;   // px: space above first node
 const BOTTOM_PAD  = 60;   // px: space below last node
-const DOT_R       = 5;    // px: dot radius (real pixels — no viewBox distortion)
+const DOT_R          = 5;   // px: normal dot radius
+const DOT_R_FEATURED = 9;   // px: featured dot radius
+const DOT_HIT_R      = 50;  // px: invisible hit-area radius — increase for easier targeting
 
 // ── Label tuning ──────────────────────────────────────────────────────────────
 // TECH_LABEL_OFFSET: px above the first Technical node — increase to push label up
 const TECH_LABEL_OFFSET = 63;
 // LIFE_LABEL_T: position along the fork bezier (0 = top of curve, 1 = first Life node)
 // decrease to move label higher/further up the curve; increase to move it closer to the node
-const LIFE_LABEL_T = 0.72;
+const LIFE_LABEL_T = 0.81;
 
 // ── Scroll animation config ───────────────────────────────────────────────────
 const SCROLL = {
@@ -33,7 +36,7 @@ const SCROLL = {
   // Fraction of scroll range devoted to the fork drawing (larger = fork draws over more scroll)
   FORK_WINDOW:        0.5,
   // When branch lines finish drawing — decrease % to finish earlier (e.g. "bottom 35%")
-  BRANCHES_END:       "bottom 25%",
+  BRANCHES_END:       "bottom 50%",
   // Scrub smoothness for lines: 0 = instant snap, higher = more lag/smoothness
   LINE_SCRUB:         0.4,
 
@@ -64,21 +67,29 @@ const SCROLL = {
   CARD_MOBILE_SCRUB:  0.5,
 };
 
-// X as fractions of container width
-// Trunk continues down as the left (technical) line.
-// Life branch forks off to the right.
+// ── Branch line positions (fractions of container width) ─────────────────────
 const X_LEFT  = 0.32;  // trunk / technical line
-const X_RIGHT = 0.68;  // extracurricular branch
+const X_RIGHT = 0.68;  // life branch
 
-// Card zones (CSS % of container)
-// "main"  → between the two lines
-const CARD_MAIN_LEFT   = X_LEFT  + 0.04;   // 36%
-const CARD_MAIN_RIGHT  = X_RIGHT - 0.04;   // 64%
-// "left"  → to the LEFT of X_LEFT (right edge of card aligned near line)
-const CARD_LEFT_END    = X_LEFT  - 0.02;   // 30%
-const CARD_LEFT_WIDTH  = 0.28;             // 28% wide → left edge at ~2%
-// "right" → to the RIGHT of X_RIGHT
-const CARD_RIGHT_START = X_RIGHT + 0.02;   // 70%
+// ── Card layout ───────────────────────────────────────────────────────────────
+// All values are fractions of container width (0–1).
+const CARD = {
+  // Clearance between a branch line and the nearest card edge.
+  // Increase if large (featured) dots overlap card text.
+  GAP_LEFT:   0.04,  // X_LEFT  → right edge of left-branch cards
+  GAP_RIGHT:  0.05,  // X_RIGHT → left edge of right-branch cards
+  // Width of left-branch cards (they extend leftward from their right edge).
+  LEFT_WIDTH: 0.40,
+  // Inset from each line toward the centre for "main" branch cards.
+  MAIN_INSET: 0.04,
+};
+
+// Derived card edges — edit CARD above, not these.
+const CARD_LEFT_END    = X_LEFT  - CARD.GAP_LEFT;   // right edge of left cards
+const CARD_LEFT_WIDTH  = CARD.LEFT_WIDTH;
+const CARD_RIGHT_START = X_RIGHT + CARD.GAP_RIGHT;  // left edge of right cards
+const CARD_MAIN_LEFT   = X_LEFT  + CARD.MAIN_INSET;
+const CARD_MAIN_RIGHT  = X_RIGHT - CARD.MAIN_INSET;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function nodeY(idx: number) { return TOP_PAD + idx * ROW_HEIGHT; }
@@ -92,8 +103,20 @@ function evalBezier(t: number, x0: number, y0: number, x1: number, y1: number, x
 }
 
 // ── GitGraph ──────────────────────────────────────────────────────────────────
-export function GitGraph() {
+export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | null) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Debounced leave: prevents the panel flashing closed when the pointer moves
+  // between a dot and its card (they're separate elements with a small gap).
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function nodeEnter(ev: TimelineEvent) {
+    if (!ev.panel) return;
+    if (leaveTimer.current) { clearTimeout(leaveTimer.current); leaveTimer.current = null; }
+    onNodeHover?.(ev);
+  }
+  function nodeLeave() {
+    leaveTimer.current = setTimeout(() => onNodeHover?.(null), 60);
+  }
 
   // Measure actual pixel width so SVG coordinates are 1:1 → perfect circles
   const [svgW, setSvgW] = useState(0);
@@ -216,7 +239,7 @@ export function GitGraph() {
           scrollTrigger: { trigger: dot, start: SCROLL.DOT_FADE_START, end: SCROLL.DOT_FADE_END, scrub: SCROLL.DOT_SCRUB },
         });
         gsap.to(dot, {
-          attr: { fill: "#fcedd3" },
+          attr: { fill: "#002147" },
           scrollTrigger: { trigger: dot, start: SCROLL.DOT_FILL_START, end: SCROLL.DOT_FILL_END, scrub: SCROLL.DOT_SCRUB },
         });
       });
@@ -262,60 +285,96 @@ export function GitGraph() {
         <svg
           width={svgW}
           height={svgHeight}
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0"
           style={{ overflow: "visible" }}
         >
+          <defs>
+            {/* Glow filter for featured nodes — stdDeviation controls spread */}
+            <filter id="dot-glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
           {/* Guide lines (dim track) */}
-          <line x1={xL} y1={TOP_PAD} x2={xL} y2={lastTrunkY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
-          <line x1={xL} y1={lastTrunkY} x2={xL} y2={forkEndY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
-          <path d={forkPath} fill="none" stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
-          <line x1={xL} y1={forkEndY} x2={xL} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
-          <line x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY} stroke="rgba(252,237,211,0.08)" strokeWidth="1" />
+          <line x1={xL} y1={TOP_PAD} x2={xL} y2={lastTrunkY} stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
+          <line x1={xL} y1={lastTrunkY} x2={xL} y2={forkEndY} stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
+          <path d={forkPath} fill="none" stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
+          <line x1={xL} y1={forkEndY} x2={xL} y2={lastBranchY} stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
+          <line x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY} stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
 
           {/* Animated: trunk (before fork) */}
           <line ref={trunkLineRef}
             x1={xL} y1={TOP_PAD} x2={xL} y2={lastTrunkY}
-            stroke="rgba(252,237,211,0.55)" strokeWidth="1.5"
+            stroke="rgba(0,33,71,0.55)" strokeWidth="1.5"
           />
 
           {/* Animated: left drop — straight connector on xL from trunk to branch */}
           <line ref={leftDropRef}
             x1={xL} y1={lastTrunkY} x2={xL} y2={forkEndY}
-            stroke="rgba(252,237,211,0.55)" strokeWidth="1.5"
+            stroke="rgba(0,33,71,0.55)" strokeWidth="1.5"
           />
 
           {/* Animated: fork bezier to right branch */}
           <path ref={forkRef}
             d={forkPath} fill="none"
-            stroke="rgba(252,237,211,0.45)" strokeWidth="1.5"
+            stroke="rgba(0,33,71,0.45)" strokeWidth="1.5"
           />
 
           {/* Animated: left branch (after fork) — synced with right */}
           <line ref={leftBranchLineRef}
             x1={xL} y1={forkEndY} x2={xL} y2={lastBranchY}
-            stroke="rgba(252,237,211,0.55)" strokeWidth="1.5"
+            stroke="rgba(0,33,71,0.55)" strokeWidth="1.5"
           />
 
           {/* Animated: right branch (after fork) — synced with left */}
           <line ref={rightBranchLineRef}
             x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY}
-            stroke="rgba(252,237,211,0.35)" strokeWidth="1.5"
+            stroke="rgba(0,33,71,0.35)" strokeWidth="1.5"
           />
 
           {/* Dots — real pixel coords, no viewBox → perfect circles */}
           {nodes.map(({ ev, y, key }, i) => {
-            const cx = ev.branch === "right" ? xR : xL;
+            const cx       = ev.branch === "right" ? xR : xL;
+            const r        = ev.weight === "featured" ? DOT_R_FEATURED : DOT_R;
+            const stroke   = ev.weight === "featured"
+              ? "rgba(0,33,71,0.85)"
+              : "rgba(0,33,71,0.55)";
             return (
               <circle
                 key={key}
                 ref={(el) => { dotRefs.current[i] = el; }}
                 cx={cx}
                 cy={y}
-                r={DOT_R}
-                fill="#002147"
-                stroke="rgba(252,237,211,0.55)"
+                r={r}
+                fill="#fcedd3"
+                stroke={stroke}
                 strokeWidth="1.5"
-                style={{ transformOrigin: `${cx}px ${y}px` }}
+                filter={ev.weight === "featured" ? "url(#dot-glow)" : undefined}
+                style={{
+                  transformOrigin: `${cx}px ${y}px`,
+                  pointerEvents: "none",
+                }}
+              />
+            );
+          })}
+
+          {/* Hit-area circles — invisible, larger radius for easier targeting */}
+          {nodes.map(({ ev, y, key }) => {
+            if (!ev.panel) return null;
+            const cx = ev.branch === "right" ? xR : xL;
+            return (
+              <circle
+                key={`hit-${key}`}
+                cx={cx}
+                cy={y}
+                r={DOT_HIT_R}
+                fill="transparent"
+                style={{ cursor: "pointer" }}
+                onMouseEnter={() => nodeEnter(ev)}
+                onMouseLeave={nodeLeave}
               />
             );
           })}
@@ -325,14 +384,14 @@ export function GitGraph() {
       {/* ── Branch label nodes — pill badges centered on their branch lines ── */}
       <div
         ref={labelLeftRef}
-        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-cream/80 bg-navy border border-cream/40 rounded px-2.5 py-1 whitespace-nowrap"
+        className="hidden md:block absolute font-poppins font-medium text-[10px] tracking-[0.15em] uppercase text-navy/90 bg-cream border border-navy/50 rounded px-2.5 py-1 whitespace-nowrap"
         style={{ left: `${X_LEFT * 100}%`, top: forkEndY - TECH_LABEL_OFFSET, transform: "translateX(-50%)" }}
       >
         Technical
       </div>
       <div
         ref={labelRightRef}
-        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-cream/80 bg-navy border border-cream/40 rounded px-2.5 py-1 whitespace-nowrap"
+        className="hidden md:block absolute font-poppins font-medium text-[10px] tracking-[0.15em] uppercase text-navy/90 bg-cream border border-navy/50 rounded px-2.5 py-1 whitespace-nowrap"
         style={{ left: lifeLabelPos.x, top: lifeLabelPos.y - 12, transform: "translateX(-50%)" }}
       >
         Life
@@ -345,6 +404,8 @@ export function GitGraph() {
           ev={ev}
           y={y}
           cardRef={(el) => { cardRefs.current[i] = el; }}
+          onEnter={nodeEnter}
+          onLeave={nodeLeave}
         />
       ))}
     </div>
@@ -356,13 +417,19 @@ function EventCard({
   ev,
   y,
   cardRef,
+  onEnter,
+  onLeave,
 }: {
   ev: TimelineEvent;
   y: number;
   cardRef: (el: HTMLDivElement | null) => void;
+  onEnter: (ev: TimelineEvent) => void;
+  onLeave: () => void;
 }) {
-  const isRight = ev.branch === "right";
-  const isLeft  = ev.branch === "left";
+  const [hovered, setHovered] = useState(false);
+  const isRight    = ev.branch === "right";
+  const hasPanel   = Boolean(ev.panel);
+  const isFeatured = ev.weight === "featured";
 
   // "left"  → sits to the LEFT of the technical line, right-aligned text
   // "right" → sits to the RIGHT of the life branch, left-aligned text
@@ -385,21 +452,38 @@ function EventCard({
     };
   }
 
+  const titleColor = "text-navy";
+  // Featured nodes get a slightly larger title.
+  const titleSize  = ev.branch === "main"
+    ? (isFeatured ? "text-2xl"    : "text-xl")
+    : (isFeatured ? "text-[20px]" : "text-[17px]");
+
   return (
     <div
       ref={cardRef}
       data-branch={ev.branch}
-      className="absolute"
+      className={`absolute ${hasPanel ? "cursor-pointer" : ""}`}
       style={{ ...posStyle, textAlign }}
+      onMouseEnter={() => { setHovered(true);  onEnter(ev); }}
+      onMouseLeave={() => { setHovered(false); onLeave();   }}
     >
-      <span className="font-poppins text-[10px] tracking-[0.2em] text-cream/30 block">
+      <span className="font-poppins font-medium text-[10px] tracking-[0.15em] text-navy/65 block">
         {ev.year}
       </span>
-      <p className={`font-instrument-serif mt-0.5 text-cream leading-snug ${ev.branch === "main" ? "text-xl" : "text-[17px]"}`}>
+      <p className={`font-instrument-serif mt-0.5 leading-snug ${titleColor} ${titleSize}`}>
         {ev.event}
       </p>
+      {/* Underline wipe — only on hoverable nodes, matches site divider animation */}
+      {hasPanel && (
+        <motion.div
+          className="h-px bg-navy/65 mt-1"
+          style={{ originX: isRight ? 0 : 1 }}
+          animate={{ scaleX: hovered ? 1 : 0 }}
+          transition={{ duration: 0.3, ease: [0.25, 0, 0, 1] }}
+        />
+      )}
       {ev.detail && (
-        <p className="font-lora text-xs text-cream/40 mt-1 leading-relaxed">
+        <p className="font-lora text-xs text-navy/75 mt-1 leading-relaxed">
           {ev.detail}
         </p>
       )}

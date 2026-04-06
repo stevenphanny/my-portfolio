@@ -9,13 +9,17 @@
 /* Colour palette + font tokens */
 @theme {
   /* Navy */
-  --color-navy: #002147;
+  --color-navy:#001E40;
 
   /* Tan */
   --color-tan: #d2b48c;
 
   /* Cream */
-  --color-cream: #fcedd3;
+  /* originially #fcedd3 */
+  /* darker E5D8BE */
+  /* even darker D9CDB4 */
+  --color-creamLight:#fcedd3;
+  --color-cream:#D9CDB4;
 
   /* Not true black - same black as MAC */
   --color-black: #333333;
