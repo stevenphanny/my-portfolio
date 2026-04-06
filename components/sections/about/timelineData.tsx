@@ -140,11 +140,17 @@ export const TIMELINE: TimelineEvent[] = [
       images: ["/about/mac-1.jpg"],
       caption: (
         <>
-          (Left to right) Tofu (Older sister), Vi (Mum), Pearl (Youngest brother).
-          <br></br >
-          Found Vi and Tofu as strays near my house. Fed them for a couple of days and eventually they warmed up. Vi ended up being pregnant, giving birth to Pearl and 5 other kittens (who I gave away to good homes). 
-          <br></br > 
-          They are genuinely some of the most affectionate, and loving cats. (Tofu lowkey beeing cold these days :/)
+          <span className="italic text-navy/60 text-xs">Left to right —</span>{" "}
+          <span className="font-medium">Tofu</span> (older sister),{" "}
+          <span className="font-medium">Vi</span> (mum),{" "}
+          <span className="font-medium">Pearl</span> (youngest brother).
+          <br /><br />
+          Found Vi and Tofu as strays near my house. Fed them for a couple of days and eventually they warmed up. Vi ended up being pregnant, giving birth to Pearl and 5 other kittens — all rehomed to good families.
+          <br /><br />
+          Genuinely some of the most{" "}
+          <span className="font-medium">affectionate</span> and{" "}
+          <span className="font-medium">loving</span> cats.{" "}
+          <span className="italic text-navy/60">(Tofu lowkey being cold these days though :/)</span>
         </>
       ),
       layout: "strip",
