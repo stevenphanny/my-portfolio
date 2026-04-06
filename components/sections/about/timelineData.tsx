@@ -105,7 +105,7 @@ export const TIMELINE: TimelineEvent[] = [
     branch: "left",
     year: "2026",
     event: "Started this Portfolio",
-    detail: "I enjoy making cool and enjoyable websites",
+    detail: "Inspired by other amazing portfolios and websites inspired me to make my own",
   },
   {
     branch: "left",
@@ -116,8 +116,13 @@ export const TIMELINE: TimelineEvent[] = [
     panel: {
       caption: (
         <>
-          - Grinding Leetcode to hopefully land a big tech internship 
-          - Try build more projects that people actually use
+          Grinding{" "}
+          <span className="font-medium">Leetcode</span>
+          {" "}- aiming to land a{" "}
+          <span className="font-instrument-serif italic text-base">big tech internship</span>.
+          <br /><br />
+          Building more projects that people{" "}
+          <span className="font-medium">actually use</span>.
         </>
       ),
       layout: "hero",
@@ -133,8 +138,16 @@ export const TIMELINE: TimelineEvent[] = [
     weight: "featured",
     panel: {
       images: ["/about/mac-1.jpg"],
-      caption: "Helping run workshops, socials, and hackathons for the coding community.",
-      layout: "grid",
+      caption: (
+        <>
+          (Left to right) Tofu (Older sister), Vi (Mum), Pearl (Youngest brother).
+          <br></br >
+          Found Vi and Tofu as strays near my house. Fed them for a couple of days and eventually they warmed up. Vi ended up being pregnant, giving birth to Pearl and 5 other kittens (who I gave away to good homes). 
+          <br></br > 
+          They are genuinely some of the most affectionate, and loving cats. (Tofu lowkey beeing cold these days :/)
+        </>
+      ),
+      layout: "strip",
     },
   },
   {
@@ -190,15 +203,22 @@ export const TIMELINE: TimelineEvent[] = [
     detail: "",
     weight: "featured",
     panel: {
+      images: ["/about/future-1.jpg", "/about/future-2.jpg", "/about/future-3.jpg"],
       caption: (
         <>
-          - Stop losing money because of my car (crash and tow away)
-          - Make more money so I can cook more and try more restaurants and bakeries
-          - Run my first Marathon at the Nike Melbourne Marathon Festival Oct. 2026
-          
+          Stop losing money on my car{" "}
+          <span className="italic text-navy/70">(a crash and a tow - been a rough year)</span>.
+          <br /><br />
+          Cook more, eat at {" "}
+          <span className="font-medium">more restaurants and bakeries</span>.
+          <br /><br />
+          Run my first full{" "}
+          <span className="font-medium">Marathon</span> at the{" "}
+          <span className="font-instrument-serif italic text-base">Nike Melbourne Marathon Festival</span>
+          {" "}— <span className="font-medium">October 2026</span>.
         </>
       ),
-      layout: "hero",
+      layout: "grid",
     },
   },
   
