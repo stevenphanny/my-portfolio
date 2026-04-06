@@ -20,14 +20,14 @@ export function NodePanel({ event }: { event: TimelineEvent | null }) {
         >
           {/* Event header */}
           <div>
-            <span className="font-poppins text-[10px] tracking-[0.3em] uppercase text-navy/30">
+            <span className="font-poppins text-[10px] tracking-[0.3em] uppercase text-navy/50">
               {event!.year}
             </span>
             <h3 className="font-instrument-serif text-4xl text-navy mt-1 leading-tight">
               {event!.event}
             </h3>
             {event!.detail && (
-              <p className="font-poppins text-xs tracking-[0.15em] text-navy/40 mt-2">
+              <p className="font-poppins text-xs tracking-[0.15em] text-navy/60 mt-2">
                 {event!.detail}
               </p>
             )}
@@ -43,7 +43,7 @@ export function NodePanel({ event }: { event: TimelineEvent | null }) {
 
           {/* Caption */}
           {panel.caption && (
-            <p className="font-lora text-sm text-navy/55 leading-relaxed">
+            <p className="font-lora text-sm text-navy/70 leading-relaxed">
               {panel.caption}
             </p>
           )}

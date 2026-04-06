@@ -54,7 +54,7 @@ export function AboutBio() {
         viewport={{ once: true, margin: "-60px" }}
         className="flex flex-col gap-6"
       >
-        <p className="font-poppins text-xs tracking-[0.3em] uppercase text-navy/40">
+        <p className="font-poppins text-xs tracking-[0.3em] uppercase text-navy/55">
           About me
         </p>
 
@@ -62,14 +62,14 @@ export function AboutBio() {
           &ldquo;Building things that feel as good as they look.&rdquo;
         </blockquote>
 
-        <p className="font-lora text-base text-navy/60 leading-relaxed">
+        <p className="font-lora text-base text-navy/75 leading-relaxed">
           I&apos;m a Software Engineering student with a deep interest in
           full-stack development and thoughtful UI design. I care about the
           craft — the details in motion, the weight of typography, and the
           feeling of using something well-made.
         </p>
 
-        <p className="font-lora text-base text-navy/60 leading-relaxed">
+        <p className="font-lora text-base text-navy/75 leading-relaxed">
           When I&apos;m not building, I&apos;m studying how good products work
           and thinking about how to make the next thing a little bit better.
         </p>

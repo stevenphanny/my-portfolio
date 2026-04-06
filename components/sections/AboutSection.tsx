@@ -17,7 +17,7 @@ export function AboutSection() {
 
         {/* Left — Git-graph timeline */}
         <div className="w-full md:w-1/2 md:pr-16">
-          <p className="font-poppins text-sm tracking-[0.3em] uppercase text-navy/70 mb-16">
+          <p className="font-poppins text-sm tracking-[0.3em] uppercase text-navy/85 mb-16">
             Journey
           </p>
           <GitGraph onNodeHover={setHoveredEvent} />

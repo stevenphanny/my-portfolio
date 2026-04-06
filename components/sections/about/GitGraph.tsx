@@ -384,14 +384,14 @@ export function GitGraph({ onNodeHover }: { onNodeHover?: (ev: TimelineEvent | n
       {/* ── Branch label nodes — pill badges centered on their branch lines ── */}
       <div
         ref={labelLeftRef}
-        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-navy/80 bg-cream border border-navy/40 rounded px-2.5 py-1 whitespace-nowrap"
+        className="hidden md:block absolute font-poppins font-medium text-[10px] tracking-[0.15em] uppercase text-navy/90 bg-cream border border-navy/50 rounded px-2.5 py-1 whitespace-nowrap"
         style={{ left: `${X_LEFT * 100}%`, top: forkEndY - TECH_LABEL_OFFSET, transform: "translateX(-50%)" }}
       >
         Technical
       </div>
       <div
         ref={labelRightRef}
-        className="hidden md:block absolute font-poppins text-[9px] tracking-[0.2em] uppercase text-navy/80 bg-cream border border-navy/40 rounded px-2.5 py-1 whitespace-nowrap"
+        className="hidden md:block absolute font-poppins font-medium text-[10px] tracking-[0.15em] uppercase text-navy/90 bg-cream border border-navy/50 rounded px-2.5 py-1 whitespace-nowrap"
         style={{ left: lifeLabelPos.x, top: lifeLabelPos.y - 12, transform: "translateX(-50%)" }}
       >
         Life
@@ -467,7 +467,7 @@ function EventCard({
       onMouseEnter={() => { setHovered(true);  onEnter(ev); }}
       onMouseLeave={() => { setHovered(false); onLeave();   }}
     >
-      <span className="font-poppins text-[10px] tracking-[0.2em] text-navy/30 block">
+      <span className="font-poppins font-medium text-[10px] tracking-[0.15em] text-navy/65 block">
         {ev.year}
       </span>
       <p className={`font-instrument-serif mt-0.5 leading-snug ${titleColor} ${titleSize}`}>
@@ -476,14 +476,14 @@ function EventCard({
       {/* Underline wipe — only on hoverable nodes, matches site divider animation */}
       {hasPanel && (
         <motion.div
-          className="h-px bg-navy/50 mt-1"
+          className="h-px bg-navy/65 mt-1"
           style={{ originX: isRight ? 0 : 1 }}
           animate={{ scaleX: hovered ? 1 : 0 }}
           transition={{ duration: 0.3, ease: [0.25, 0, 0, 1] }}
         />
       )}
       {ev.detail && (
-        <p className="font-lora text-xs text-navy/40 mt-1 leading-relaxed">
+        <p className="font-lora text-xs text-navy/75 mt-1 leading-relaxed">
           {ev.detail}
         </p>
       )}
