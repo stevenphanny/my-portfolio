@@ -1,7 +1,6 @@
 import type { ComponentType } from "react";
 
 import { AboutSection } from "@/components/sections/AboutSection";
-import { CardDeckSection } from "@/components/sections/CardDeckSection";
 import { ContactSection } from "@/components/sections/ContactSection";
 import { IntroSection } from "@/components/sections/IntroSection";
 import { VenetianSection } from "@/components/sections/VenetianSection";
@@ -35,13 +34,6 @@ export const SECTION_REGISTRY: SectionProps[] = [
     bgClass: "bg-navy",
     navColor: "cream",
     Component: VenetianSection,
-  },
-  {
-    id: "other-projects",
-    label: "Other Projects",
-    bgClass: "bg-cream",
-    navColor: "navy",
-    Component: CardDeckSection,
   },
   {
     id: "contact",
