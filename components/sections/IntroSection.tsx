@@ -139,7 +139,7 @@ export function IntroSection() {
           variants={row1Variants}
           initial="hidden"
           animate="show"
-          className="font-instrument-serif text-cream leading-none tracking-tight flex"
+          className="font-instrument-serif text-creamLight leading-none tracking-tight flex"
           style={{ fontSize: "clamp(4rem, 13vw, 14rem)" }}
           onMouseMove={isMobile ? undefined : (e) => cursorX.set(e.clientX)}
           onMouseLeave={isMobile ? undefined : () => cursorX.set(-1)}
