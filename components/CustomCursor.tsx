@@ -79,6 +79,7 @@ export function CustomCursor() {
       rawY.set(e.clientY - CURSOR_SIZE / 2);
       pointerPos.current = { cx: e.clientX, cy: e.clientY };
       detectColor(e.clientX, e.clientY);
+      setVisible(true);
     };
 
     // Re-check colour on scroll — the section under the cursor may have changed

@@ -81,22 +81,21 @@ input:-webkit-autofill {
   -webkit-text-fill-color: #002147;
 }
 
-/* Custom navy scrollbar for locked node panels */
+/* Custom navy scrollbar for node panels */
 .panel-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-navy) transparent;
+  scrollbar-color: rgba(0, 30, 64, 0.35) transparent;
 }
 .panel-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
   display: block;
 }
 .panel-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .panel-scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--color-navy);
-  border-radius: 2px;
-  opacity: 0.5;
+  background-color: rgba(0, 30, 64, 0.35);
+  border-radius: 999px;
 }
 
 /* TODO for later */
