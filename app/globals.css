@@ -84,7 +84,7 @@ input:-webkit-autofill {
 /* Custom navy scrollbar for node panels */
 .panel-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 30, 64, 0.35) transparent;
+  scrollbar-color: var(--color-navy) transparent;
 }
 .panel-scrollbar::-webkit-scrollbar {
   width: 3px;
@@ -94,7 +94,7 @@ input:-webkit-autofill {
   background: transparent;
 }
 .panel-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 30, 64, 0.35);
+  background-color: var(--color-navy);
   border-radius: 999px;
 }
 

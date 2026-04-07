@@ -516,6 +516,7 @@ export function GitGraph({
           cardRef={(el) => { cardRefs.current[i] = el; }}
           onEnter={nodeEnter}
           onLeave={nodeLeave}
+          onClick={onNodeClick}
         />
       ))}
     </div>
@@ -529,14 +530,15 @@ function EventCard({
   cardRef,
   onEnter,
   onLeave,
+  onClick,
 }: {
   ev: TimelineEvent;
   y: number;
   cardRef: (el: HTMLDivElement | null) => void;
   onEnter: (ev: TimelineEvent) => void;
   onLeave: () => void;
+  onClick?: (ev: TimelineEvent) => void;
 }) {
-  const [hovered, setHovered] = useState(false);
   const isRight    = ev.branch === "right";
   const hasPanel   = Boolean(ev.panel);
   const isFeatured = ev.weight === "featured";
@@ -574,8 +576,9 @@ function EventCard({
       data-branch={ev.branch}
       className={`absolute ${hasPanel ? "cursor-pointer" : ""}`}
       style={{ ...posStyle, textAlign }}
-      onMouseEnter={() => { setHovered(true);  onEnter(ev); }}
-      onMouseLeave={() => { setHovered(false); onLeave();   }}
+      onMouseEnter={() => onEnter(ev)}
+      onMouseLeave={() => onLeave()}
+      onClick={() => hasPanel && onClick?.(ev)}
     >
       <span className="font-poppins font-medium text-[10px] tracking-[0.15em] text-navy/65 block">
         {ev.year}
@@ -583,15 +586,6 @@ function EventCard({
       <p className={`font-instrument-serif mt-0.5 leading-snug ${titleColor} ${titleSize}`}>
         {ev.event}
       </p>
-      {/* Underline wipe — only on hoverable nodes, matches site divider animation */}
-      {hasPanel && (
-        <motion.div
-          className="h-px bg-navy/65 mt-1"
-          style={{ originX: isRight ? 0 : 1 }}
-          animate={{ scaleX: hovered ? 1 : 0 }}
-          transition={{ duration: 0.3, ease: [0.25, 0, 0, 1] }}
-        />
-      )}
       {ev.detail && (
         <p className="font-lora text-xs text-navy/75 mt-1 leading-relaxed">
           {ev.detail}
