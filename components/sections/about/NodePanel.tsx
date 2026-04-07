@@ -23,8 +23,8 @@ export function NodePanel({ event, isLocked }: { event: TimelineEvent | null; is
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.38, ease: [0.25, 0, 0, 1] }}
-          className={`absolute top-0 left-0 ${sizeClass} max-h-[85vh] bg-cream flex flex-col gap-5 overflow-y-auto overscroll-contain z-10${isLocked && panel?.size === "large" ? " panel-scrollbar" : ""}`}
-          onWheel={(e) => { if (isLocked && panel?.size === "large") e.stopPropagation(); }}
+          className={`absolute top-0 left-0 ${sizeClass} max-h-[calc(100vh-7rem)] bg-cream flex flex-col gap-5 overflow-y-auto overscroll-contain z-10 panel-scrollbar`}
+          onWheel={(e) => { if (isLocked) e.stopPropagation(); }}
         >
           {/* Event header */}
           <div>

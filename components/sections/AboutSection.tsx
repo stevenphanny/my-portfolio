@@ -52,7 +52,13 @@ export function AboutSection() {
         </div>
 
         {/* Right — Bio sticky on desktop, panel overlays on hover */}
-        <div className="w-full md:w-1/2 md:pl-16 md:sticky md:top-24 md:self-start relative">
+        <div
+          className="w-full md:w-1/2 md:pl-16 md:sticky md:top-24 md:self-start relative"
+          style={{
+            minHeight: showPanel ? "calc(100vh - 7rem)" : undefined,
+            overflowY: showPanel ? "clip" : "visible",
+          }}
+        >
           <motion.div
             animate={{ opacity: showPanel ? 0 : 1 }}
             transition={{ duration: 0.3, ease: [0.25, 0, 0, 1] }}
