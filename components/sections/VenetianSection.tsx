@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, useInView } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 
 type Project = {
   id: string;
@@ -117,12 +117,51 @@ const cardVariants = {
   }),
 };
 
+// ── TextReveal — yellow block wipe triggered on scroll ────────────────────────
+function TextReveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+
+  return (
+    <span ref={ref} className="relative inline-block overflow-x-clip">
+      <span className="invisible">{children}</span>
+
+      <motion.span
+        className="absolute inset-0"
+        initial={{ clipPath: "inset(-10% 100% -10% 0)" }}
+        animate={
+          inView
+            ? {
+                clipPath: [
+                  "inset(-10% 100% -10% 0)",
+                  "inset(-10% 100% -10% 0)",
+                  "inset(-10% 100% -10% 0)",
+                  "inset(-10% 0% -10% 0)",
+                ],
+              }
+            : undefined
+        }
+        transition={{ duration: 1.3, delay, ease: "easeInOut", times: [0, 0.25, 0.55, 1] }}
+      >
+        {children}
+      </motion.span>
+
+      <motion.span
+        className="absolute -inset-y-2 left-0 right-0 bg-[#FCEDD3]"
+        initial={{ x: "-105%" }}
+        animate={inView ? { x: ["-105%", "0%", "0%", "200%"] } : undefined}
+        transition={{ duration: 1.3, delay, ease: "easeInOut", times: [0, 0.25, 0.6, 1] }}
+      />
+    </span>
+  );
+}
+
 function ProjectText({ project }: { project: Project }) {
   return (
     <div className="flex flex-col justify-center gap-4">
       <p className="font-poppins text-xs tracking-[0.3em] uppercase text-cream/30">{project.id}</p>
       <h3 className="font-instrument-serif text-3xl md:text-4xl text-cream leading-tight">
-        {project.title}
+        <TextReveal delay={0.3}>{project.title}</TextReveal>
       </h3>
       <div className="flex flex-wrap gap-2">
         {project.tags.map((tag) => (
