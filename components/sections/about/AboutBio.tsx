@@ -57,7 +57,7 @@ export function AboutBio() {
 
         <blockquote className="font-instrument-serif text-3xl md:text-4xl text-navy leading-snug">
           &ldquo;Say <span className="font-extrabold">Yes</span> to opportunities that{" "}
-          <span className="italic">scare you</span>. It could change your life.&rdquo;
+          <span className="italic">scare you</span>&rdquo;
         </blockquote>
 
         <p className="font-lora text-base text-navy/75 leading-relaxed">
@@ -67,8 +67,7 @@ export function AboutBio() {
           <br /><br />
           I care about the{" "}
           <span className="font-semibold text-navy">experience</span> — the{" "}
-          <span className="font-semibold text-navy italic">details</span> in motion, the weight of{" "}
-          <span className="font-semibold text-navy italic">typography</span>, and the feeling of using something{" "}
+          <span className="font-semibold text-navy italic">details</span> in motion. The weight of{" "}
           <span className="font-semibold text-navy">well-made</span>.
         </p>
 
