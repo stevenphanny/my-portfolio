@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 // ── Layout constants ──────────────────────────────────────────────────────────
 const FORK_DROP   = ROW_HEIGHT;  // match row spacing for consistent dot gaps
 const TOP_PAD     = 10;   // px: space above first node
-const BOTTOM_PAD  = 400;   // px: space below last node
+const BOTTOM_PAD  = 600;   // px: space below last node
 const DOT_R          = 5;   // px: normal dot radius
 const DOT_R_FEATURED = 10;   // px: featured dot radius
 const DOT_HIT_R      = 50;  // px: invisible hit-area radius — increase for easier targeting

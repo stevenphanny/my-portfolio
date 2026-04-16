@@ -50,6 +50,8 @@ export type TimelineEvent = {
 // branch: "main"  → trunk (before fork)
 // branch: "left"  → academics / internships / technical
 // branch: "right" → extracurricular / life
+
+const IMG_PATH_PREFIX = "/about/"; // URL path — files live in public/about/
 export const TIMELINE: TimelineEvent[] = [
   {
     branch: "main",
@@ -79,7 +81,7 @@ export const TIMELINE: TimelineEvent[] = [
     detail: "Electrical Self Driving Software engineer",
     weight: "featured",
     panel: {
-      images: ["/about/mcav-1.jpg", "/about/mcav-2.jpg"],
+      images: [`${IMG_PATH_PREFIX}mcav-1.jpg`, `${IMG_PATH_PREFIX}mcav-2.jpg`],
       caption: (
         <>
           May 27, 2025 · Detroit, Michigan, USA
@@ -144,7 +146,7 @@ export const TIMELINE: TimelineEvent[] = [
     detail: "So many strays around my area",
     weight: "featured",
     panel: {
-      images: ["/about/mac-1.jpg"],
+      images: ["/about/cats/Vi1.JPG", "/about/cats/Vi2.JPG"],
       caption: (
         <>
           <span className="italic text-navy/60 text-xs">Left to right —</span>{" "}
