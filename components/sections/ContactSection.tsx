@@ -1,223 +1,126 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
-// ── Config ────────────────────────────────────────────────────────────────────
 const CONTACT_EMAIL = "stevenphan@outlook.com.au";
+const MAX_MESSAGE = 600;
+const EASE = [0.25, 0, 0, 1] as [number, number, number, number];
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 type FormStatus = "idle" | "loading" | "success" | "error";
 
-type FormData = {
-  name: string;
-  email: string;
-  message: string;
-};
+const INPUT_CLASS =
+  "bg-transparent border-0 border-b border-navy/20 focus:border-navy/60 focus:outline-none text-navy font-lora text-lg py-3 w-full placeholder:text-navy/20 transition-colors duration-300 caret-navy";
 
-// ── Variants ──────────────────────────────────────────────────────────────────
-const sectionVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.18 } },
-};
+function CopyEmailCard() {
+  const [copied, setCopied] = useState(false);
 
-const columnVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: [0.25, 0, 0, 1] as [number, number, number, number] },
-  },
-};
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
 
-const fieldsContainerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
-};
-
-const fieldVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.25, 0, 0, 1] as [number, number, number, number] },
-  },
-};
-
-// ── FloatingField ─────────────────────────────────────────────────────────────
-type FloatingFieldProps = {
-  id: string;
-  label: string;
-  type?: "text" | "email" | "textarea";
-  value: string;
-  onChange: (val: string) => void;
-  required?: boolean;
-  rows?: number;
-};
-
-function FloatingField({
-  id,
-  label,
-  type = "text",
-  value,
-  onChange,
-  required = false,
-  rows = 4,
-}: FloatingFieldProps) {
-  const [focused, setFocused] = useState(false);
-  const isActive = focused || value.length > 0;
-
-  const sharedClass =
-    "bg-transparent border-0 border-b border-navy/30 focus:border-navy focus:outline-none w-full py-2 text-navy font-lora text-base transition-colors duration-200";
+  function handleCopy() {
+    navigator.clipboard?.writeText(CONTACT_EMAIL).then(() => setCopied(true));
+  }
 
   return (
-    <motion.div variants={fieldVariants} className="relative pt-6">
-      <motion.label
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="group flex items-center justify-between w-full border border-navy/15 rounded-xl px-4 py-3 hover:border-navy/30 transition-colors duration-300 cursor-pointer"
+    >
+      <span className="font-poppins text-sm text-navy truncate">
+        {CONTACT_EMAIL}
+      </span>
+      <AnimatePresence mode="wait">
+        {copied ? (
+          <motion.span
+            key="check"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.15 }}
+            className="font-poppins text-xs text-navy/60 flex-shrink-0 ml-3 flex items-center gap-1"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Copied
+          </motion.span>
+        ) : (
+          <motion.span
+            key="copy"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="font-poppins text-xs text-navy/25 group-hover:text-navy/50 flex-shrink-0 ml-3 transition-colors duration-200"
+          >
+            Copy
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </button>
+  );
+}
+
+type FieldBlockProps = {
+  id: string;
+  label: string;
+  index: number;
+  charLimit?: number;
+  charCount?: number;
+  children: React.ReactNode;
+};
+
+function FieldBlock({ id, label, index, charLimit, charCount, children }: FieldBlockProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.65, ease: EASE, delay: index * 0.13 }}
+    >
+      <label
         htmlFor={id}
-        className="absolute left-0 top-6 pointer-events-none font-poppins"
-        animate={isActive ? "active" : "resting"}
-        variants={{
-          resting: {
-            y: type === "textarea" ? 8 : 6,
-            fontSize: "1rem",
-            color: "rgba(0,33,71,0.45)",
-          },
-          active: {
-            y: -22,
-            fontSize: "0.75rem",
-            color: "#002147",
-          },
-        }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="block font-instrument-serif text-3xl text-navy leading-none mb-4"
       >
         {label}
-      </motion.label>
-
-      {type === "textarea" ? (
-        <textarea
-          id={id}
-          rows={rows}
-          value={value}
-          required={required}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          onChange={(e) => onChange(e.target.value)}
-          className={`${sharedClass} resize-none`}
-        />
-      ) : (
-        <input
-          id={id}
-          type={type}
-          value={value}
-          required={required}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          onChange={(e) => onChange(e.target.value)}
-          className={sharedClass}
-        />
+      </label>
+      {children}
+      {charLimit !== undefined && charCount !== undefined && (
+        <div className="flex justify-end mt-2">
+          <span className="font-poppins text-xs text-navy/25 tabular-nums">
+            {charCount} / {charLimit}
+          </span>
+        </div>
       )}
     </motion.div>
   );
 }
 
-// ── CopyEmailCard ─────────────────────────────────────────────────────────────
-function CopyEmailCard() {
-  const [copied, setCopied] = useState(false);
-
-  function handleCopy() {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(CONTACT_EMAIL).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
-    }
-  }
-
-  return (
-    <div className="border border-navy/20 rounded-lg px-4 py-3 flex items-center justify-between gap-3">
-      <span className="font-poppins text-sm text-navy truncate">
-        {CONTACT_EMAIL}
-      </span>
-
-      <button
-        type="button"
-        onClick={handleCopy}
-        aria-label="Copy email address"
-        className="flex-shrink-0 flex items-center gap-1.5 text-navy/50 hover:text-navy transition-colors duration-200 cursor-pointer"
-      >
-        <AnimatePresence mode="wait">
-          {copied ? (
-            <motion.span
-              key="check"
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.7 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center gap-1 font-poppins text-xs text-navy"
-            >
-              {/* Checkmark */}
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              Copied!
-            </motion.span>
-          ) : (
-            <motion.span
-              key="copy"
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.7 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center"
-            >
-              {/* Copy icon */}
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </button>
-    </div>
-  );
-}
-
-// ── ContactSection ────────────────────────────────────────────────────────────
 export function ContactSection() {
   const nameId = useId();
   const emailId = useId();
   const messageId = useId();
 
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    message: "",
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState<FormStatus>("idle");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (status === "loading") return;
-
     setStatus("loading");
     try {
       const res = await fetch("/api/contact", {
@@ -225,7 +128,7 @@ export function ContactSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      if (!res.ok) throw new Error("Request failed");
+      if (!res.ok) throw res;
       setStatus("success");
     } catch {
       setStatus("error");
@@ -233,216 +136,223 @@ export function ContactSection() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4">
+    <div className="mx-auto w-full max-w-6xl px-4">
+      <div className="grid grid-cols-12 gap-8 md:gap-16 items-start">
 
-      {/* Eyebrow + heading */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.7, ease: [0.25, 0, 0, 1] }}
-      >
-        <p className="font-poppins text-xs tracking-[0.3em] uppercase text-navy/50 mb-4">
-          Contact
-        </p>
-        <h2 className="font-instrument-serif text-5xl md:text-7xl text-navy leading-tight">
-          Let&apos;s work
-          <br />
-          together.
-        </h2>
-      </motion.div>
-
-      {/* Divider — wipes in from the left */}
-      <motion.div
-        initial={{ scaleX: 0, opacity: 0 }}
-        whileInView={{ scaleX: 1, opacity: 1 }}
-        viewport={{ once: true, margin: "-60px" }}
-        style={{ originX: 0 }}
-        transition={{ duration: 0.9, delay: 0.25, ease: [0.25, 0, 0, 1] }}
-        className="h-px w-full bg-navy/10 my-12"
-      />
-
-      {/* Two-column grid */}
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20"
-        variants={sectionVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-      >
-        {/* Left column — intro + direct contact */}
-        <motion.div variants={columnVariants} className="flex flex-col gap-8">
-          <div>
-            <p className="font-poppins text-xs tracking-[0.25em] uppercase text-navy/40 mb-3">
-              Get in touch
-            </p>
-            <p className="font-lora text-base text-navy/70 leading-relaxed">
-              Whether you have a project in mind, a question, or just want to
-              say hello — I&apos;d love to hear from you. I&apos;ll get back to
-              you as soon as I can.
-            </p>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.8, ease: EASE }}
+          className="col-span-12 md:col-span-4 relative overflow-hidden md:sticky md:top-28 md:self-start"
+        >
+          <div
+            className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none select-none"
+            aria-hidden="true"
+          >
+            <span
+              className="font-instrument-serif text-navy/[0.04] whitespace-nowrap"
+              style={{ fontSize: "clamp(60px, 8vw, 100px)", writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+            >
+              CONTACT
+            </span>
           </div>
 
-          <div>
-            <p className="font-poppins text-xs tracking-[0.25em] uppercase text-navy/40 mb-3">
-              Or reach out directly
+          <div className="hidden md:block absolute right-0 top-0 h-full w-px bg-navy/10" />
+
+          <div className="relative z-10 flex flex-col gap-10 pb-8 md:pr-10">
+            <div>
+              <p className="font-poppins text-xs tracking-[0.3em] uppercase text-navy/35 mb-5">
+                Contact
+              </p>
+              <div className="overflow-hidden">
+                <motion.h2
+                  initial={{ clipPath: "inset(0 0 100% 0)" }}
+                  whileInView={{ clipPath: "inset(0 0 0% 0)" }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.9, ease: EASE, delay: 0.1 }}
+                  className="font-instrument-serif text-5xl text-navy leading-[1.05]"
+                >
+                  Get in<br />touch.
+                </motion.h2>
+              </div>
+            </div>
+
+            <p className="font-lora text-base text-navy/55 leading-relaxed">
+              Whether you have a project in mind, a question, or just want to
+              say hello — I&apos;d love to hear from you.
             </p>
-            <CopyEmailCard />
+
+            <div className="h-px w-full bg-navy/10" />
+
+            <div>
+              <p className="font-poppins text-xs tracking-[0.25em] uppercase text-navy/35 mb-3">
+                Or reach out directly
+              </p>
+              <CopyEmailCard />
+            </div>
           </div>
         </motion.div>
 
-        {/* Right column — form */}
-        <motion.form variants={columnVariants} onSubmit={handleSubmit}>
-          <motion.div
-            variants={fieldsContainerVariants}
-            className="flex flex-col gap-6"
-          >
-            <FloatingField
-              id={nameId}
-              label="Name"
-              type="text"
-              value={formData.name}
-              onChange={(val) =>
-                setFormData((prev) => ({ ...prev, name: val }))
-              }
-              required
-            />
-            <FloatingField
-              id={emailId}
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={(val) =>
-                setFormData((prev) => ({ ...prev, email: val }))
-              }
-              required
-            />
-            <FloatingField
-              id={messageId}
-              label="Message"
-              type="textarea"
-              value={formData.message}
-              onChange={(val) =>
-                setFormData((prev) => ({ ...prev, message: val }))
-              }
-              required
-              rows={5}
-            />
-
-            {/* Submit — last stagger child */}
-            <motion.div
-              variants={fieldVariants}
-              className="flex justify-end pt-2"
-            >
-              <button
-                type="submit"
-                disabled={status === "loading" || status === "success"}
-                className="min-w-[160px] flex items-center justify-center bg-navy text-cream font-poppins text-sm tracking-wider rounded-full px-8 py-3 transition-all duration-300 hover:bg-navy/80 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 cursor-pointer"
+        <div className="col-span-12 md:col-span-8">
+          <AnimatePresence mode="wait">
+            {status === "success" ? (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, y: 25 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.7, ease: EASE }}
+                className="flex flex-col items-start justify-center py-20"
               >
-                <AnimatePresence mode="wait">
-                  {status === "idle" && (
-                    <motion.span
-                      key="idle"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="flex items-center gap-2"
-                    >
-                      Send message
-                      {/* Arrow right */}
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                      </svg>
-                    </motion.span>
-                  )}
+                <p className="font-poppins text-xs tracking-[0.3em] uppercase text-navy/35 mb-6">
+                  Sent
+                </p>
+                <p className="font-instrument-serif text-5xl md:text-7xl text-navy mb-5 leading-tight">
+                  Thank you.
+                </p>
+                <p className="font-lora text-navy/55 text-lg leading-relaxed">
+                  I&apos;ll get back to you at{" "}
+                  <span className="text-navy">{formData.email}</span> soon.
+                </p>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                onSubmit={handleSubmit}
+                exit={{ opacity: 0 }}
+                className="flex flex-col gap-10"
+              >
+                <FieldBlock id={nameId} label="Name" index={0}>
+                  <input
+                    id={nameId}
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    required
+                    placeholder="Your full name"
+                    className={INPUT_CLASS}
+                  />
+                </FieldBlock>
 
-                  {status === "loading" && (
-                    <motion.span
-                      key="loading"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      {/* Spinner */}
-                      <svg
-                        className="animate-spin"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          opacity="0.3"
-                        />
-                        <path
-                          d="M12 2a10 10 0 0 1 10 10"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </motion.span>
-                  )}
+                <FieldBlock id={emailId} label="Email" index={1}>
+                  <input
+                    id={emailId}
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, email: e.target.value }))
+                    }
+                    required
+                    placeholder="your@email.com"
+                    className={INPUT_CLASS}
+                  />
+                </FieldBlock>
 
-                  {status === "success" && (
-                    <motion.span
-                      key="success"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="flex items-center gap-2"
-                    >
-                      {/* Checkmark */}
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      Sent!
-                    </motion.span>
-                  )}
+                <FieldBlock
+                  id={messageId}
+                  label="Message"
+                  index={2}
+                  charLimit={MAX_MESSAGE}
+                  charCount={formData.message.length}
+                >
+                  <textarea
+                    id={messageId}
+                    value={formData.message}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        message: e.target.value.slice(0, MAX_MESSAGE),
+                      }))
+                    }
+                    required
+                    rows={6}
+                    placeholder="Tell me about your project, timeline, or just say hello..."
+                    className={`${INPUT_CLASS} resize-none`}
+                  />
+                </FieldBlock>
 
-                  {status === "error" && (
-                    <motion.span
-                      key="error"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      Try again
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </button>
-            </motion.div>
-          </motion.div>
-        </motion.form>
-      </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.6, ease: EASE, delay: 0.4 }}
+                  className="flex justify-end pt-2"
+                >
+                  <button
+                    type="submit"
+                    disabled={status === "loading"}
+                    className="group flex items-center gap-3 bg-navy text-cream font-poppins text-sm tracking-wider rounded-full px-8 py-3 transition-all duration-300 hover:bg-navy/80 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <AnimatePresence mode="wait">
+                      {status === "loading" ? (
+                        <motion.span
+                          key="loading"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                          className="flex items-center gap-2"
+                        >
+                          Sending
+                          <svg
+                            className="animate-spin"
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" opacity="0.3" />
+                            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          </svg>
+                        </motion.span>
+                      ) : status === "error" ? (
+                        <motion.span
+                          key="error"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          Try again
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="idle"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                          className="flex items-center gap-2"
+                        >
+                          Send message
+                          <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="transition-transform duration-300 group-hover:translate-x-[3px] group-hover:-translate-y-[3px]"
+                          >
+                            <path d="M22 2L11 13" />
+                            <path d="M22 2L15 22l-4-9-9-4 20-7z" />
+                          </svg>
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </button>
+                </motion.div>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
+
+      </div>
     </div>
   );
 }
