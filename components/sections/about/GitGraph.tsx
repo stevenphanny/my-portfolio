@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timelineData";
+// TIMELINE is the static fallback — runtime data comes via the timeline prop
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -127,10 +128,12 @@ function UnlockedIcon() {
 
 // ── GitGraph ──────────────────────────────────────────────────────────────────
 export function GitGraph({
+  timeline = TIMELINE,
   onNodeHover,
   lockedEvent,
   onNodeClick,
 }: {
+  timeline?: TimelineEvent[];
   onNodeHover?: (ev: TimelineEvent | null) => void;
   lockedEvent?: TimelineEvent | null;
   onNodeClick?: (ev: TimelineEvent) => void;
@@ -170,9 +173,9 @@ export function GitGraph({
   }, []);
 
   // ── Event arrays ──────────────────────────────────────────────────────────
-  const trunkEvents = useMemo(() => TIMELINE.filter(e => e.branch === "main"), []);
-  const leftEvents  = useMemo(() => TIMELINE.filter(e => e.branch === "left"),  []);
-  const rightEvents = useMemo(() => TIMELINE.filter(e => e.branch === "right"), []);
+  const trunkEvents = useMemo(() => timeline.filter(e => e.branch === "main"), [timeline]);
+  const leftEvents  = useMemo(() => timeline.filter(e => e.branch === "left"),  [timeline]);
+  const rightEvents = useMemo(() => timeline.filter(e => e.branch === "right"), [timeline]);
   const maxRows     = Math.max(leftEvents.length, rightEvents.length);
 
   // ── Y geometry ────────────────────────────────────────────────────────────

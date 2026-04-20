@@ -21,7 +21,10 @@
       "Bash(echo '{\"workspace\":{\"current_dir\":\"C:\\\\\\\\LOCAL CODING FILE\\\\\\\\MAC\\\\\\\\my-portfolio\"},\"model\":{\"display_name\":\"Claude Opus 4.7\",\"id\":\"claude-opus-4-7\"},\"output_style\":{\"name\":\"default\"},\"context_window\":{\"used_percentage\":42.5}}')",
       "Bash(bash \"C:/Users/steve/.claude/statusline-command.sh\")",
       "Bash(echo '{\"workspace\":{\"current_dir\":\"C:\\\\\\\\LOCAL CODING FILE\\\\\\\\MAC\\\\\\\\my-portfolio\"},\"model\":{\"display_name\":\"Claude Opus 4.7\"},\"context_window\":{\"used_percentage\":42.5}}')",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "mcp__Sanity__whoami",
+      "mcp__Sanity__list_projects",
+      "mcp__Sanity__create_project"
     ]
   }
 }

@@ -44,6 +44,8 @@ export type TimelineEvent = {
   weight?: "normal" | "featured";
   /** If present, hovering this node opens the right-column panel. */
   panel?: NodePanel;
+  /** Matches the eventKey in Sanity — used to merge CMS images into this event's panel. */
+  eventKey?: string;
 };
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -80,6 +82,7 @@ export const TIMELINE: TimelineEvent[] = [
     event: "Monash Connected Autonomous Vehicles (MCAV)",
     detail: "Electrical Self Driving Software engineer",
     weight: "featured",
+    eventKey: "mcav",
     panel: {
       images: [`${IMG_PATH_PREFIX}mcav-1.jpg`, `${IMG_PATH_PREFIX}mcav-2.jpg`],
       caption: (
@@ -98,6 +101,7 @@ export const TIMELINE: TimelineEvent[] = [
     event: "UNIHACK",
     detail: "6th place across Australia",
     weight: "featured",
+    eventKey: "unihack",
     panel: {
       images: ["/about/unihack-1.jpg", "/about/unihack-2.jpg"],
       caption: (
@@ -122,6 +126,7 @@ export const TIMELINE: TimelineEvent[] = [
     event: "What's next...",
     detail: "",
     weight: "featured",
+    eventKey: "whats-next-left",
     panel: {
       caption: (
         <>
@@ -145,6 +150,7 @@ export const TIMELINE: TimelineEvent[] = [
     event: "Found my 3 beautiful Cats",
     detail: "So many strays around my area",
     weight: "featured",
+    eventKey: "cats",
     panel: {
       images: ["/about/cats/Vi1.JPG", "/about/cats/Vi2.JPG"],
       caption: (
@@ -172,6 +178,7 @@ export const TIMELINE: TimelineEvent[] = [
     event: "My first half marathon",
     detail: "Thought I was cooked",
     weight: "featured",
+    eventKey: "marathon",
     panel: {
       images: ["/about/hackathon-1.jpg", "/about/hackathon-2.jpg", "/about/hackathon-3.jpg", "/about/hackathon-4.jpg"],
       caption: (
@@ -193,6 +200,7 @@ export const TIMELINE: TimelineEvent[] = [
     event: "Joined MAC",
     detail: "Best. Decision. Ever.",
     weight: "featured",
+    eventKey: "mac",
     panel: {
       images: ["/about/climbing-1.jpg", "/about/climbing-2.jpg"],
       caption: (
@@ -219,6 +227,7 @@ export const TIMELINE: TimelineEvent[] = [
     event: "What's next...",
     detail: "",
     weight: "featured",
+    eventKey: "whats-next-right",
     panel: {
       images: ["/about/future-1.jpg", "/about/future-2.jpg", "/about/future-3.jpg"],
       caption: (

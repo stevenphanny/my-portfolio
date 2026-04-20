@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 import { AboutBio } from "./about/AboutBio";
 import { GitGraph } from "./about/GitGraph";
 import { NodePanel } from "./about/NodePanel";
-import type { TimelineEvent } from "./about/timelineData";
+import { TIMELINE, type TimelineEvent } from "./about/timelineData";
 
-export function AboutSection() {
+export function AboutSection({ timeline = TIMELINE }: { timeline?: TimelineEvent[] }) {
   const [hoveredEvent, setHoveredEvent] = useState<TimelineEvent | null>(null);
   const [lockedEvent,  setLockedEvent]  = useState<TimelineEvent | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -45,6 +45,7 @@ export function AboutSection() {
             Journey
           </p>
           <GitGraph
+            timeline={timeline}
             onNodeHover={setHoveredEvent}
             lockedEvent={lockedEvent}
             onNodeClick={handleNodeClick}
