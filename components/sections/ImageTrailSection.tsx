@@ -91,8 +91,8 @@ export function ImageTrailSection() {
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative w-full overflow-hidden"
-      style={{ minHeight: "70vh", cursor: "none" }}
+      className="relative w-full min-h-screen overflow-hidden"
+      style={{ cursor: "none" }}
     >
       {/* Hint label — above trail images */}
       <div

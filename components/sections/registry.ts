@@ -11,6 +11,7 @@ export type SectionProps = {
   label: string;
   bgClass?: string;
   navColor: "cream" | "navy";
+  fullBleed?: boolean;
   Component: ComponentType;
 };
 
@@ -32,8 +33,9 @@ export const SECTION_REGISTRY: SectionProps[] = [
   {
     id: "trail",
     label: "Trail",
-    bgClass: "bg-cream",
+    bgClass: "bg-tan",
     navColor: "navy",
+    fullBleed: true,
     Component: ImageTrailSection,
   },
   {
