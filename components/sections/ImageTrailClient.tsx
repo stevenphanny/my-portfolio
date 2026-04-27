@@ -3,14 +3,26 @@
 import { useRef, useEffect, useCallback } from "react";
 import type GsapDefault from "gsap";
 
-const IMG_W    = 160;
-const IMG_H    = 200;
-const MIN_DIST = 90;
-const BORDER_R = 16;
+// ═══ TRAIL CONFIG — tweak these to adjust feel ═══
+const IMG_W             = 160;   // image width (px)
+const IMG_H             = 200;   // image height (px)
+const MIN_DIST          = 180;   // min px between spawns (↑ = less overlap)
+const COOLDOWN_MS       = 100;    // min ms between spawns (↑ = slower trail)
+const BORDER_R          = 16;    // border-radius (px)
+const MAX_ROTATION      = 15;    // max random tilt in degrees (0 = no tilt)
+const FADE_IN_DURATION  = 0.35;  // seconds to appear
+const FADE_IN_SCALE     = 0.7;   // start scale
+const PEAK_SCALE        = 1.08;  // max scale at full opacity
+const LINGER_DURATION   = 0.8;   // seconds image stays at full opacity before fading
+const FADE_OUT_DURATION = 0.8;   // seconds to disappear
+const FADE_OUT_SCALE    = 0.85;  // end scale
+// SHADOW: add boxShadow to img.style.cssText for depth, e.g. "box-shadow: 0 4px 24px rgba(0,0,0,0.15);"
+// DRIFT: add { y: "-=20" } to the linger/fadeOut tween for a floating feel
 
 export function ImageTrailClient({ images }: { images: string[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPos      = useRef<{ x: number; y: number } | null>(null);
+  const lastTime     = useRef(0);
   const imgIndex     = useRef(0);
   const zCounter     = useRef(1);
   const gsapRef      = useRef<typeof GsapDefault | null>(null);
@@ -28,12 +40,18 @@ export function ImageTrailClient({ images }: { images: string[] }) {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
+    const now = Date.now();
+    if (now - lastTime.current < COOLDOWN_MS) return;
+
     if (lastPos.current) {
       const dx = x - lastPos.current.x;
       const dy = y - lastPos.current.y;
       if (dx * dx + dy * dy < MIN_DIST * MIN_DIST) return;
     }
     lastPos.current = { x, y };
+    lastTime.current = now;
+
+    const rotation = (Math.random() - 0.5) * 2 * MAX_ROTATION;
 
     const img = document.createElement("img");
     img.src = images[imgIndex.current % images.length];
@@ -57,8 +75,12 @@ export function ImageTrailClient({ images }: { images: string[] }) {
     container.appendChild(img);
 
     gsap.timeline({ onComplete: () => img.remove() })
-      .fromTo(img, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1.12, duration: 0.25, ease: "power2.out" })
-      .to(img, { opacity: 0, scale: 0.78, duration: 0.75, ease: "power2.in" });
+      .fromTo(img,
+        { opacity: 0, scale: FADE_IN_SCALE, rotation },
+        { opacity: 1, scale: PEAK_SCALE, rotation, duration: FADE_IN_DURATION, ease: "power2.out" },
+      )
+      .to(img, { duration: LINGER_DURATION })
+      .to(img, { opacity: 0, scale: FADE_OUT_SCALE, duration: FADE_OUT_DURATION, ease: "power2.in" });
   }, [images]);
 
   useEffect(() => {
