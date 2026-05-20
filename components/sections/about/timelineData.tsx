@@ -81,8 +81,6 @@ export const TIMELINE: TimelineEvent[] = [
     year: "2025",
     event: "Monash Connected Autonomous Vehicles (MCAV)",
     detail: "Electrical Self Driving Software engineer",
-    weight: "featured",
-    eventKey: "mcav",
     panel: {
       images: [`${IMG_PATH_PREFIX}mcav-1.jpg`, `${IMG_PATH_PREFIX}mcav-2.jpg`],
       caption: (
