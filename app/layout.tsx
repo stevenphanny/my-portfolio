@@ -2,10 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Ballet, Instrument_Serif, Lora} from "next/font/google";
 
 import "./globals.css";
-import { CustomCursor } from "@/components/CustomCursor";
-import { LenisProvider } from "@/components/LenisProvider";
-import LoadingScreen from "@/components/LoadingScreen";
-import StripeScrollIndicator from "@/components/StripeScrollIndicator";
+import { AppShell } from "@/components/AppShell";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -49,12 +46,7 @@ export default function RootLayout({
       <body
         className={`${lora.variable} ${poppins.variable} ${ballet.variable} ${instrumentSerif.className} tracking-wider antialiased`}
       >
-      <LoadingScreen />
-      <CustomCursor />
-      <LenisProvider>
-        <StripeScrollIndicator />
-        {children}
-      </LenisProvider>
+      <AppShell>{children}</AppShell>
       <Analytics />
       <SpeedInsights />
       </body>
