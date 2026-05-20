@@ -19,20 +19,6 @@ export const trailImageSchema = defineType({
       options: { hotspot: true },
       validation: (r) => r.required(),
     }),
-    defineField({
-      name: 'order',
-      title: 'Order',
-      type: 'number',
-      description: 'Lower numbers appear earlier in the trail cycle',
-      initialValue: 0,
-    }),
-  ],
-  orderings: [
-    {
-      title: 'Order',
-      name: 'orderAsc',
-      by: [{ field: 'order', direction: 'asc' }],
-    },
   ],
   preview: {
     select: { title: 'title', media: 'image' },

@@ -2,83 +2,11 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-
-type Project = {
-  id: string;
-  title: string;
-  year: string;
-  tags: string[];
-  desc: string;
-  image?: string;
-  live?: string;
-  github?: string;
-};
-
-const PROJECTS: Project[] = [
-  {
-    id: "01",
-    title: "Monash Association of Coding",
-    year: "2024",
-    tags: ["React", "Node.js", "REST API"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it.",
-    image: "/projects/mac.png",
-    live: "https://www.monashcoding.com/",
-    github: "#",
-  },
-  {
-    id: "02",
-    title: "BeeSafe",
-    year: "2024",
-    tags: ["Next.js", "TypeScript", "PostgreSQL"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it.",
-    image: "/projects/beeSafe.png",
-    live: "https://devpost.com/software/beesafe-njd4hi",
-    github: "#",
-  },
-  {
-    id: "03",
-    title: "Blackjack",
-    year: "2023",
-    tags: ["Python", "FastAPI", "Figma"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it.",
-    image: "/projects/blackjack.png",
-    live: "https://stevenphanny-blackjack.vercel.app/",
-    github: "#",
-  },
-];
-
-const OTHER_PROJECTS: Project[] = [
-  {
-    id: "01",
-    title: "Monash Association of Coding",
-    year: "2024",
-    tags: ["React", "Node.js", "REST API"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it.",
-    image: "/projects/mac.png",
-    live: "https://www.monashcoding.com/",
-    github: "#",
-  },
-  {
-    id: "02",
-    title: "BeeSafe",
-    year: "2024",
-    tags: ["Next.js", "TypeScript", "PostgreSQL"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it.",
-    image: "/projects/beeSafe.png",
-    live: "https://devpost.com/software/beesafe-njd4hi",
-    github: "#",
-  },
-  {
-    id: "03",
-    title: "Blackjack",
-    year: "2023",
-    tags: ["Python", "FastAPI", "Figma"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it.",
-    image: "/projects/blackjack.png",
-    live: "https://stevenphanny-blackjack.vercel.app/",
-    github: "#",
-  },
-];
+import {
+  FEATURED_PROJECTS as PROJECTS,
+  OTHER_PROJECTS,
+  type Project,
+} from "./projectData";
 
 const CARD_RATIO = 16 / 9.5;
 const STRIP_COUNT = 7;

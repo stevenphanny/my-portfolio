@@ -81,17 +81,6 @@ export const TIMELINE: TimelineEvent[] = [
     year: "2025",
     event: "Monash Connected Autonomous Vehicles (MCAV)",
     detail: "Electrical Self Driving Software engineer",
-    panel: {
-      images: [`${IMG_PATH_PREFIX}mcav-1.jpg`, `${IMG_PATH_PREFIX}mcav-2.jpg`],
-      caption: (
-        <>
-          May 27, 2025 · Detroit, Michigan, USA
-          <br />
-          <span className="font-medium">Intelligent Ground Vehicle Competition (IGVC)</span>
-        </>
-      ),
-      layout: "hero",
-    },
   },
   {
     branch: "left",

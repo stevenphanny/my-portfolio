@@ -23,7 +23,7 @@ export function ImageTrailClient({ images, children }: { images: string[]; child
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPos      = useRef<{ x: number; y: number } | null>(null);
   const lastTime     = useRef(0);
-  const imgIndex     = useRef(0);
+  const lastImageIndex = useRef<number | null>(null);
   const zCounter     = useRef(1);
   const gsapRef      = useRef<typeof GsapDefault | null>(null);
 
@@ -52,10 +52,15 @@ export function ImageTrailClient({ images, children }: { images: string[]; child
     lastTime.current = now;
 
     const rotation = (Math.random() - 0.5) * 2 * MAX_ROTATION;
+    let imageIndex = Math.floor(Math.random() * images.length);
+
+    if (images.length > 1 && imageIndex === lastImageIndex.current) {
+      imageIndex = (imageIndex + 1) % images.length;
+    }
+    lastImageIndex.current = imageIndex;
 
     const img = document.createElement("img");
-    img.src = images[imgIndex.current % images.length];
-    imgIndex.current++;
+    img.src = images[imageIndex];
 
     img.style.cssText = `
       position: absolute;

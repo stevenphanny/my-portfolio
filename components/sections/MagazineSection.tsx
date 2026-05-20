@@ -1,50 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-
-type Project = {
-  id: string;
-  title: string;
-  year: string;
-  tags: string[];
-  desc: string;
-  image?: string;
-  live?: string;
-  github?: string;
-};
-
-const PROJECTS: Project[] = [
-  {
-    id: "01",
-    title: "Monash Association of Coding",
-    year: "2024",
-    tags: ["React", "Node.js", "REST API"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it.",
-    image: "/projects/mac.png",
-    live: "https://www.monashcoding.com/",
-    github: "#",
-  },
-  {
-    id: "02",
-    title: "BeeSafe",
-    year: "2024",
-    tags: ["Next.js", "TypeScript", "PostgreSQL"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it.",
-    image: "/projects/beeSafe.png",
-    live: "https://devpost.com/software/beesafe-njd4hi",
-    github: "#",
-  },
-  {
-    id: "03",
-    title: "Blackjack",
-    year: "2023",
-    tags: ["Python", "FastAPI", "Figma"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it.",
-    image: "/projects/blackjack.png",
-    live: "https://stevenphanny-blackjack.vercel.app/",
-    github: "#",
-  },
-];
+import { FEATURED_PROJECTS as PROJECTS, type Project } from "./projectData";
 
 const EASE = [0.25, 0, 0, 1] as [number, number, number, number];
 const SPRING_EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];

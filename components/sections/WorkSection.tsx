@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { FEATURED_PROJECTS as PROJECTS, type Project } from "./projectData";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Switch variants — change this one value to preview each design
@@ -15,50 +16,6 @@ const CARD_RATIO = 16 / 9.5;
 const IMAGE_SCALE = 1.06;
 
 // ── Project data ──────────────────────────────────────────────────────────────
-type Project = {
-  id: string;
-  title: string;
-  year: string;
-  tags: string[];
-  desc: string;
-  image?: string;
-  live?: string;
-  github?: string;
-};
-
-const PROJECTS: Project[] = [
-  {
-    id: "01",
-    title: "Monash Association of Coding",
-    year: "2024",
-    tags: ["React", "Node.js", "REST API"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it. Replace with your real content.",
-    image: "/projects/mac.png",
-    live: "https://www.monashcoding.com/",
-    github: "#",
-  },
-  {
-    id: "02",
-    title: "BeeSafe",
-    year: "2024",
-    tags: ["Next.js", "TypeScript", "PostgreSQL"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it. Replace with your real content.",
-    image: "/projects/beeSafe.png",
-    live: "https://devpost.com/software/beesafe-njd4hi",
-    github: "#",
-  },
-  {
-    id: "03",
-    title: "Blackjack",
-    year: "2023",
-    tags: ["Python", "FastAPI", "Figma"],
-    desc: "A short description of what this project does, the problem it solves, and what was interesting about building it. Replace with your real content.",
-    image: "/projects/blackjack.png",
-    live: "https://stevenphanny-blackjack.vercel.app/",
-    github: "#",
-  },
-];
-
 // ── Shared animation variants ─────────────────────────────────────────────────
 const headingVariants = {
   hidden: { clipPath: "inset(0 0 100% 0)", y: 10 },

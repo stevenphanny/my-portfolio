@@ -1,7 +1,7 @@
 import { groq } from 'next-sanity'
 
 export const trailImagesQuery = groq`
-  *[_type == "trailImage"] | order(order asc) {
+  *[_type == "trailImage"] {
     "url": image.asset->url,
   }
 `
