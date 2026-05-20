@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 
-import { AboutSection } from "@/components/sections/AboutSection";
+import { AboutSectionWrapper } from "@/components/sections/AboutSectionWrapper";
 import { ContactSection } from "@/components/sections/ContactSection";
 import { IntroSection } from "@/components/sections/IntroSection";
 import { VenetianSection } from "@/components/sections/VenetianSection";
@@ -10,6 +10,7 @@ export type SectionProps = {
   label: string;
   bgClass?: string;
   navColor: "cream" | "navy";
+  fullBleed?: boolean;
   Component: ComponentType;
 };
 
@@ -26,7 +27,8 @@ export const SECTION_REGISTRY: SectionProps[] = [
     label: "About",
     bgClass: "bg-cream",
     navColor: "navy",
-    Component: AboutSection,
+    fullBleed: true,
+    Component: AboutSectionWrapper,
   },
   {
     id: "work",

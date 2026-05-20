@@ -9,12 +9,12 @@ export default function Home() {
       />
 
       <div className="flex flex-col">
-        {SECTION_REGISTRY.map(({ id, bgClass, Component }) => (
+        {SECTION_REGISTRY.map(({ id, bgClass, fullBleed, Component }) => (
           <section
             key={id}
             id={id}
             data-bg={bgClass?.replace("bg-", "")}
-            className={`min-h-screen flex items-center justify-center px-6 py-24 ${bgClass ?? ""}`}
+            className={`min-h-screen ${fullBleed ? "flex" : "flex items-center justify-center px-6 py-24"} ${bgClass ?? ""}`}
           >
             <Component />
           </section>

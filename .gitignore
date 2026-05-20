@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# playwright MCP scratch — snapshots, console logs, screenshots
+.playwright-mcp/
+
 # vercel
 .vercel
 

@@ -5,13 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TIMELINE, BRANCH_AFTER, ROW_HEIGHT, type TimelineEvent } from "./timelineData";
+// TIMELINE is the static fallback — runtime data comes via the timeline prop
 
 gsap.registerPlugin(ScrollTrigger);
 
 // ── Layout constants ──────────────────────────────────────────────────────────
 const FORK_DROP   = ROW_HEIGHT;  // match row spacing for consistent dot gaps
 const TOP_PAD     = 10;   // px: space above first node
-const BOTTOM_PAD  = 400;   // px: space below last node
+const BOTTOM_PAD  = 600;   // px: space below last node
 const DOT_R          = 5;   // px: normal dot radius
 const DOT_R_FEATURED = 10;   // px: featured dot radius
 const DOT_HIT_R      = 50;  // px: invisible hit-area radius — increase for easier targeting
@@ -127,10 +128,12 @@ function UnlockedIcon() {
 
 // ── GitGraph ──────────────────────────────────────────────────────────────────
 export function GitGraph({
+  timeline = TIMELINE,
   onNodeHover,
   lockedEvent,
   onNodeClick,
 }: {
+  timeline?: TimelineEvent[];
   onNodeHover?: (ev: TimelineEvent | null) => void;
   lockedEvent?: TimelineEvent | null;
   onNodeClick?: (ev: TimelineEvent) => void;
@@ -142,6 +145,14 @@ export function GitGraph({
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hoveredFeaturedId, setHoveredFeaturedId] = useState<string | null>(null);
 
+  // Pulse-ring hint on featured nodes — dismissed once user hovers any featured node.
+  // Persisted per-session so it doesn't re-appear on every navigation back to the section.
+  const [hintDismissed, setHintDismissed] = useState(true);
+  useEffect(() => {
+    const seen = typeof window !== "undefined" && sessionStorage.getItem("gitgraph-featured-hovered") === "1";
+    setHintDismissed(seen);
+  }, []);
+
   // Unique key per node — prevents same-name nodes (e.g. two "What's next...") from colliding
   const evId = (ev: TimelineEvent) => `${ev.branch}:${ev.event}`;
 
@@ -149,7 +160,13 @@ export function GitGraph({
     if (!ev.panel) return;
     if (leaveTimer.current) { clearTimeout(leaveTimer.current); leaveTimer.current = null; }
     onNodeHover?.(ev);
-    if (ev.weight === "featured") setHoveredFeaturedId(evId(ev));
+    if (ev.weight === "featured") {
+      setHoveredFeaturedId(evId(ev));
+      if (!hintDismissed) {
+        setHintDismissed(true);
+        sessionStorage.setItem("gitgraph-featured-hovered", "1");
+      }
+    }
   }
   function nodeLeave() {
     leaveTimer.current = setTimeout(() => {
@@ -170,9 +187,9 @@ export function GitGraph({
   }, []);
 
   // ── Event arrays ──────────────────────────────────────────────────────────
-  const trunkEvents = useMemo(() => TIMELINE.filter(e => e.branch === "main"), []);
-  const leftEvents  = useMemo(() => TIMELINE.filter(e => e.branch === "left"),  []);
-  const rightEvents = useMemo(() => TIMELINE.filter(e => e.branch === "right"), []);
+  const trunkEvents = useMemo(() => timeline.filter(e => e.branch === "main"), [timeline]);
+  const leftEvents  = useMemo(() => timeline.filter(e => e.branch === "left"),  [timeline]);
+  const rightEvents = useMemo(() => timeline.filter(e => e.branch === "right"), [timeline]);
   const maxRows     = Math.max(leftEvents.length, rightEvents.length);
 
   // ── Y geometry ────────────────────────────────────────────────────────────
@@ -356,6 +373,10 @@ export function GitGraph({
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            {/* Wider halo for the pulsing aura behind featured dots */}
+            <filter id="dot-halo" x="-150%" y="-150%" width="400%" height="400%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="7" />
+            </filter>
           </defs>
           {/* Guide lines (dim track) */}
           <line x1={xL} y1={TOP_PAD} x2={xL} y2={lastTrunkY} stroke="rgba(0,33,71,0.08)" strokeWidth="1" />
@@ -393,6 +414,54 @@ export function GitGraph({
             x1={xR} y1={forkEndY} x2={xR} y2={lastBranchY}
             stroke="rgba(0,33,71,0.35)" strokeWidth="1.5"
           />
+
+          {/* Pulsing halo behind featured dots — independent of dot fill animation */}
+          {nodes.map(({ ev, y, key }) => {
+            if (ev.weight !== "featured") return null;
+            const cx = ev.branch === "right" ? xR : xL;
+            return (
+              <motion.circle
+                key={`halo-${key}`}
+                cx={cx}
+                cy={y}
+                fill="rgba(0,33,71,0.55)"
+                filter="url(#dot-halo)"
+                style={{ pointerEvents: "none" }}
+                initial={{ r: DOT_R_FEATURED + 2, opacity: 0.35 }}
+                animate={{
+                  r: [DOT_R_FEATURED + 2, DOT_R_FEATURED + 8, DOT_R_FEATURED + 2],
+                  opacity: [0.3, 0.7, 0.3],
+                }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+              />
+            );
+          })}
+
+          {/* Pulse ring — radar ping until user hovers any featured node */}
+          {!hintDismissed && nodes.map(({ ev, y, key }, idx) => {
+            if (ev.weight !== "featured") return null;
+            const cx = ev.branch === "right" ? xR : xL;
+            return (
+              <motion.circle
+                key={`ping-${key}`}
+                cx={cx}
+                cy={y}
+                fill="none"
+                stroke="rgba(0,33,71,0.7)"
+                strokeWidth="1"
+                style={{ pointerEvents: "none" }}
+                initial={{ r: DOT_R_FEATURED, opacity: 0.7 }}
+                animate={{ r: [DOT_R_FEATURED, DOT_R_FEATURED + 22], opacity: [0.7, 0] }}
+                transition={{
+                  duration: 1.8,
+                  repeat: Infinity,
+                  ease: "easeOut",
+                  repeatDelay: 0.6,
+                  delay: idx * 0.25,
+                }}
+              />
+            );
+          })}
 
           {/* Dots — real pixel coords, no viewBox → perfect circles */}
           {nodes.map(({ ev, y, key }, i) => {
