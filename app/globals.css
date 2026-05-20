@@ -43,14 +43,14 @@
   font-family: var(--font-instrument-serif);
 }
 /* Hide native scrollbar — replaced by StripeScrollIndicator on the right */
-html,
-body {
+html.portfolio-mode,
+body.portfolio-mode {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE / Edge legacy */
 }
 
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
+html.portfolio-mode::-webkit-scrollbar,
+body.portfolio-mode::-webkit-scrollbar {
   width: 0;
   display: none; /* Chrome, Safari, Edge */
 }
@@ -64,14 +64,16 @@ body::-webkit-scrollbar {
 body {
   background: var(--color-navy);
   color: var(--color-cream);
-  cursor: none;
   margin: 0;
   padding: 0;
   height: 100%;
 }
 
-/* Ensure cursor: none propagates to all interactive elements */
-*, *::before, *::after {
+/* Ensure the custom cursor only applies to the portfolio, not embedded tools like Sanity Studio. */
+body.portfolio-mode,
+body.portfolio-mode *,
+body.portfolio-mode *::before,
+body.portfolio-mode *::after {
   cursor: none;
 }
 
