@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, type ReactNode } from "react";
 import type GsapDefault from "gsap";
 
 // ═══ TRAIL CONFIG — tweak these to adjust feel ═══
@@ -19,7 +19,7 @@ const FADE_OUT_SCALE    = 0.85;  // end scale
 // SHADOW: add boxShadow to img.style.cssText for depth, e.g. "box-shadow: 0 4px 24px rgba(0,0,0,0.15);"
 // DRIFT: add { y: "-=20" } to the linger/fadeOut tween for a floating feel
 
-export function ImageTrailClient({ images }: { images: string[] }) {
+export function ImageTrailClient({ images, children }: { images: string[]; children?: ReactNode }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPos      = useRef<{ x: number; y: number } | null>(null);
   const lastTime     = useRef(0);
@@ -100,14 +100,11 @@ export function ImageTrailClient({ images }: { images: string[] }) {
       className="relative w-full min-h-screen overflow-hidden"
       style={{ cursor: "none" }}
     >
-      <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-        style={{ zIndex: 9999 }}
-      >
-        <p className="font-poppins text-xs tracking-[0.3em] uppercase text-navy/25 select-none">
-          move your cursor
-        </p>
-      </div>
+      {children && (
+        <div className="absolute top-0 left-0 right-0 z-[9999] pointer-events-none pt-16 md:pt-24 px-6 text-center">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

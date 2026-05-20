@@ -2,7 +2,6 @@ import type { ComponentType } from "react";
 
 import { AboutSectionWrapper } from "@/components/sections/AboutSectionWrapper";
 import { ContactSection } from "@/components/sections/ContactSection";
-import { ImageTrailSection } from "@/components/sections/ImageTrailSection";
 import { IntroSection } from "@/components/sections/IntroSection";
 import { VenetianSection } from "@/components/sections/VenetianSection";
 
@@ -28,15 +27,8 @@ export const SECTION_REGISTRY: SectionProps[] = [
     label: "About",
     bgClass: "bg-cream",
     navColor: "navy",
-    Component: AboutSectionWrapper,
-  },
-  {
-    id: "trail",
-    label: "Trail",
-    bgClass: "bg-tan",
-    navColor: "navy",
     fullBleed: true,
-    Component: ImageTrailSection,
+    Component: AboutSectionWrapper,
   },
   {
     id: "work",

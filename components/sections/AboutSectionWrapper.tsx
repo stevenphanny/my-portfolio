@@ -1,5 +1,5 @@
 import { client } from "@/sanity/lib/client";
-import { timelinePanelsQuery } from "@/sanity/lib/queries";
+import { timelinePanelsQuery, trailImagesQuery } from "@/sanity/lib/queries";
 import { TIMELINE } from "./about/timelineData";
 import { AboutSection } from "./AboutSection";
 
@@ -10,10 +10,16 @@ type SanityPanel = {
   panelSize: "small" | "medium" | "large" | null;
 };
 
+const FALLBACK_TRAIL_IMAGES = [
+  "/about/cats/Vi1.JPG",
+  "/about/cats/Vi2.JPG",
+];
+
 export async function AboutSectionWrapper() {
-  const panels: SanityPanel[] = await client
-    .fetch(timelinePanelsQuery)
-    .catch(() => []);
+  const [panels, trailDocs] = await Promise.all([
+    client.fetch<SanityPanel[]>(timelinePanelsQuery).catch(() => []),
+    client.fetch<{ url: string }[]>(trailImagesQuery).catch(() => []),
+  ]);
 
   const panelMap = new Map(panels.map((p) => [p.eventKey, p]));
 
@@ -32,5 +38,12 @@ export async function AboutSectionWrapper() {
     };
   });
 
-  return <AboutSection timeline={mergedTimeline} />;
+  const trailImages = trailDocs.map((d) => d.url).filter(Boolean);
+
+  return (
+    <AboutSection
+      timeline={mergedTimeline}
+      trailImages={trailImages.length > 0 ? trailImages : FALLBACK_TRAIL_IMAGES}
+    />
+  );
 }
