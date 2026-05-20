@@ -1,6 +1,8 @@
 import { Navbar } from "@/components/Navbar";
 import { SECTION_REGISTRY } from "@/components/sections/registry";
 
+export const revalidate = 60;
+
 export default function Home() {
   return (
     <main className="relative min-h-screen bg-slate-900 text-slate-50">
