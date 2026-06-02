@@ -9,6 +9,14 @@ import {
 } from "./projectData";
 
 const CARD_RATIO = 16 / 9.5;
+const IMAGE_ASPECT_RATIO = {
+  landscape: CARD_RATIO,
+  vertical: 4 / 5,
+} as const;
+const IMAGE_FRAME_CLASS = {
+  landscape: "w-full",
+  vertical: "mx-auto w-full max-w-80 md:max-w-[22rem]",
+} as const;
 const STRIP_COUNT = 7;
 const EASE = [0.25, 0, 0, 1] as [number, number, number, number];
 const SPRING_EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
@@ -121,14 +129,19 @@ function VenetianCard({ project, index }: { project: Project; index: number }) {
   const [hovered, setHovered] = useState(false);
   const imageRight = index % 2 !== 0;
   const linkUrl = project.live && project.live !== "#" ? project.live : undefined;
+  const imageOrientation = project.imageOrientation ?? "landscape";
+  const imageFit = project.imageFit ?? "cover";
+  const imageScale = project.imageScale ?? 1.06;
+  const imageHoverScale = project.imageHoverScale ?? 1.03;
+  const verticalAlignmentClass = imageRight ? "md:ml-auto md:mr-0" : "md:mr-auto md:ml-0";
 
   const strips = Array.from({ length: STRIP_COUNT }, (_, i) => i);
   const stripHeightPct = 100 / STRIP_COUNT;
 
   const imageBlock = (
     <div
-      className="relative rounded-xl overflow-hidden cursor-pointer"
-      style={{ aspectRatio: CARD_RATIO }}
+      className={`relative rounded-xl overflow-hidden cursor-pointer ${IMAGE_FRAME_CLASS[imageOrientation]} ${imageOrientation === "vertical" ? verticalAlignmentClass : ""} ${imageFit === "contain" ? "bg-cream" : ""}`}
+      style={{ aspectRatio: IMAGE_ASPECT_RATIO[imageOrientation] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -137,9 +150,9 @@ function VenetianCard({ project, index }: { project: Project; index: number }) {
         <motion.img
           src={project.image}
           alt={project.title}
-          animate={{ scale: hovered ? 1.03 : 1.06 }}
+          animate={{ scale: hovered ? imageHoverScale : imageScale }}
           transition={{ duration: 0.65, ease: EASE }}
-          className="absolute inset-0 w-full h-full object-cover"
+          className={`absolute inset-0 w-full h-full ${imageFit === "contain" ? "object-contain" : "object-cover"}`}
         />
       )}
 

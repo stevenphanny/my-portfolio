@@ -5,6 +5,10 @@ export type Project = {
   tags: string[];
   desc: string;
   image?: string;
+  imageOrientation?: "landscape" | "vertical";
+  imageFit?: "cover" | "contain";
+  imageScale?: number;
+  imageHoverScale?: number;
   live?: string;
   github?: string;
 };
@@ -26,7 +30,11 @@ export const FEATURED_PROJECTS: Project[] = [
     year: "2026",
     tags: ["Next.js", "TypeScript", "Product"],
     desc: "A careers board helping Monash students discover internships, graduate roles, and tech opportunities.",
-    image: "/projects/mac.png",
+    image: "/projects/mac_job_board.png",
+    imageOrientation: "vertical",
+    imageFit: "contain",
+    imageScale: 0.96,
+    imageHoverScale: 1,
     live: "https://jobs.monashcoding.com/jobs",
     github: "#",
   },
@@ -59,7 +67,7 @@ export const OTHER_PROJECTS: Project[] = [
     year: "2026",
     tags: ["Next.js", "Course Planning", "MAC"],
     desc: "A course mapping tool for Monash students, built with the MAC projects team.",
-    image: "/projects/mac.png",
+    image: "/projects/monmap.png",
     live: "https://monmap.monashcoding.com/",
     github: "#",
   },

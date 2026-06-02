@@ -46,7 +46,7 @@ export function NodePanel({ event, isLocked }: { event: TimelineEvent | null; is
 
           {/* Images */}
           {panel.images && panel.images.length > 0 && (
-            <ImageLayout images={panel.images} layout={panel.layout} />
+            <ImageLayout images={panel.images} layout={panel.layout} imageFit={panel.imageFit} />
           )}
 
           {/* Caption */}
@@ -64,16 +64,20 @@ export function NodePanel({ event, isLocked }: { event: TimelineEvent | null; is
 function ImageLayout({
   images,
   layout,
+  imageFit = "cover",
 }: {
   images: string[];
   layout?: NodePanelData["layout"];
+  imageFit?: NodePanelData["imageFit"];
 }) {
   const mode = layout ?? (images.length === 1 ? "hero" : "grid");
+  const imageClassName = imageFit === "contain" ? "object-contain p-1" : "object-cover";
+  const frameClassName = imageFit === "contain" ? "bg-navy/5" : "";
 
   if (mode === "hero") {
     return (
-      <div className="relative w-full aspect-[4/3] overflow-hidden rounded-sm">
-        <Image src={images[0]} alt="" fill className="object-cover" />
+      <div className={`relative w-full aspect-[4/3] overflow-hidden rounded-sm ${frameClassName}`}>
+        <Image src={images[0]} alt="" fill className={imageClassName} />
       </div>
     );
   }
@@ -84,9 +88,9 @@ function ImageLayout({
         {images.map((src, i) => (
           <div
             key={i}
-            className="relative flex-shrink-0 w-44 aspect-[3/4] overflow-hidden rounded-sm"
+            className={`relative flex-shrink-0 w-44 aspect-[3/4] overflow-hidden rounded-sm ${frameClassName}`}
           >
-            <Image src={src} alt="" fill className="object-cover" />
+            <Image src={src} alt="" fill className={imageClassName} />
           </div>
         ))}
       </div>
@@ -97,8 +101,8 @@ function ImageLayout({
   return (
     <div className="grid grid-cols-2 gap-2">
       {images.map((src, i) => (
-        <div key={i} className="relative aspect-[4/3] overflow-hidden rounded-sm">
-          <Image src={src} alt="" fill className="object-cover" />
+        <div key={i} className={`relative aspect-[4/3] overflow-hidden rounded-sm ${frameClassName}`}>
+          <Image src={src} alt="" fill className={imageClassName} />
         </div>
       ))}
     </div>

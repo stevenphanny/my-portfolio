@@ -22,6 +22,7 @@ export type NodePanel = {
    * - "strip" : images side by side in a scrollable row
    */
   layout?: "hero" | "grid" | "strip";
+  imageFit?: "cover" | "contain";
   /**
    * Panel size:
    * - "small"  : compact panel
@@ -134,7 +135,7 @@ export const TIMELINE: TimelineEvent[] = [
   {
     branch: "right",
     year: "2024",
-    event: "Found my 3 beautiful Cats",
+    event: "Found my 3 Cats",
     detail: "So many strays around my area",
     weight: "featured",
     eventKey: "cats",
@@ -143,8 +144,8 @@ export const TIMELINE: TimelineEvent[] = [
       caption: (
         <>
           <span className="italic text-navy/60 text-xs">Left to right —</span>{" "}
-          <span className="font-medium">Tofu</span> (older sister),{" "}
           <span className="font-medium">Vi</span> (mum),{" "}
+          <span className="font-medium">Tofu</span> (older sister),{" "}
           <span className="font-medium">Pearl</span> (youngest brother).
           <br /><br />
           Found Vi and Tofu as strays near my house. Fed them for a couple of days and eventually they warmed up. Vi ended up being pregnant, giving birth to Pearl and 5 other kittens — all rehomed to good families.
@@ -178,6 +179,7 @@ export const TIMELINE: TimelineEvent[] = [
         </>
       ),
       layout: "grid",
+      imageFit: "contain",
       size: "large",
     },
   },
@@ -219,8 +221,7 @@ export const TIMELINE: TimelineEvent[] = [
       images: ["/about/future-1.jpg", "/about/future-2.jpg", "/about/future-3.jpg"],
       caption: (
         <>
-          Stop losing money on my car{" "}
-          <span className="italic text-navy/70">(a crash and a tow - been a rough year)</span>.
+          (I&apos;m not performative I swear)
           <br /><br />
           Cook more, eat at {" "}
           <span className="font-medium">more restaurants and bakeries</span>.
