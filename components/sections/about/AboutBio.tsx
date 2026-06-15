@@ -60,16 +60,7 @@ export function AboutBio() {
           <span className="italic">scare you</span>&rdquo;
         </blockquote>
 
-        <p className="font-lora text-base text-navy/75 leading-relaxed">
-          I&apos;m a Software Engineering student with a deep interest in{" "}
-          <span className="font-semibold text-navy">full-stack development</span> and{" "}
-          <span className="font-semibold text-navy">thoughtful UI design</span>.
-          <br /><br />
-          I care about the{" "}
-          <span className="font-semibold text-navy">experience</span> — the{" "}
-          <span className="font-semibold text-navy italic">details</span> in motion. The weight of{" "}
-          <span className="font-semibold text-navy">well-made</span>.
-        </p>
+        
 
         <p className="font-lora text-base text-navy/75 leading-relaxed">
           When I&apos;m not coding, I love cooking, rating restaurants and bakeries,

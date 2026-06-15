@@ -118,9 +118,7 @@ export const TIMELINE: TimelineEvent[] = [
     panel: {
       caption: (
         <>
-          Grinding{" "}
-          <span className="font-medium">Leetcode</span>
-          {" "}- aiming to land a{" "}
+          Aiming to land a{" "}
           <span className="font-instrument-serif italic text-base">big tech internship</span>.
           <br /><br />
           Building more projects that people{" "}
@@ -221,8 +219,6 @@ export const TIMELINE: TimelineEvent[] = [
       images: ["/about/future-1.jpg", "/about/future-2.jpg", "/about/future-3.jpg"],
       caption: (
         <>
-          (I&apos;m not performative I swear)
-          <br /><br />
           Cook more, eat at {" "}
           <span className="font-medium">more restaurants and bakeries</span>.
           <br /><br />
