@@ -54,7 +54,13 @@ const cardVariants = {
 };
 
 // ── TextReveal — yellow block wipe triggered on scroll ────────────────────────
-function TextReveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+function TextReveal({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
@@ -77,7 +83,12 @@ function TextReveal({ children, delay = 0 }: { children: React.ReactNode; delay?
               }
             : undefined
         }
-        transition={{ duration: 1.3, delay, ease: "easeInOut", times: [0, 0.25, 0.55, 1] }}
+        transition={{
+          duration: 1.3,
+          delay,
+          ease: "easeInOut",
+          times: [0, 0.25, 0.55, 1],
+        }}
       >
         {children}
       </motion.span>
@@ -86,7 +97,12 @@ function TextReveal({ children, delay = 0 }: { children: React.ReactNode; delay?
         className="absolute -inset-y-2 left-0 right-0 bg-[#FCEDD3]"
         initial={{ x: "-105%" }}
         animate={inView ? { x: ["-105%", "0%", "0%", "200%"] } : undefined}
-        transition={{ duration: 1.3, delay, ease: "easeInOut", times: [0, 0.25, 0.6, 1] }}
+        transition={{
+          duration: 1.3,
+          delay,
+          ease: "easeInOut",
+          times: [0, 0.25, 0.6, 1],
+        }}
       />
     </span>
   );
@@ -95,26 +111,33 @@ function TextReveal({ children, delay = 0 }: { children: React.ReactNode; delay?
 function ProjectText({ project }: { project: Project }) {
   return (
     <div className="flex flex-col justify-center gap-4">
-      <p className="font-poppins text-xs tracking-[0.3em] uppercase text-cream/30">{project.id}</p>
+      <p className="font-poppins text-xs tracking-[0.3em] uppercase text-cream/30">
+        {project.id}
+      </p>
       <h3 className="font-instrument-serif text-3xl md:text-4xl text-cream leading-tight">
         <TextReveal delay={0.3}>{project.title}</TextReveal>
       </h3>
       <div className="flex flex-wrap gap-2">
         {project.tags.map((tag) => (
-          <span key={tag} className="rounded-full border border-cream/40 px-3 py-1 font-poppins text-xs text-cream/50">
+          <span
+            key={tag}
+            className="rounded-full border border-cream/40 px-3 py-1 font-poppins text-xs text-cream/50"
+          >
             {tag}
           </span>
         ))}
       </div>
-      <p className="font-lora text-sm text-cream/65 leading-relaxed">{project.desc}</p>
+      <p className="font-lora text-sm text-cream/65 leading-relaxed">
+        {project.desc}
+      </p>
       <div className="flex gap-5">
         {project.live && project.live !== "#" && (
-          <a href={project.live} target="_blank" rel="noopener noreferrer"
-            className="group inline-flex items-center gap-1.5 font-poppins text-xs text-cream/60 transition-colors duration-200 hover:text-cream">
-            Live
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-              <path d="M7 17L17 7M7 7h10v10" />
-            </svg>
+          <a
+            href={project.live}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center font-poppins text-xs text-cream/60 transition-colors duration-200 hover:text-cream"
+          >
           </a>
         )}
       </div>
@@ -128,12 +151,15 @@ function ProjectText({ project }: { project: Project }) {
 function VenetianCard({ project, index }: { project: Project; index: number }) {
   const [hovered, setHovered] = useState(false);
   const imageRight = index % 2 !== 0;
-  const linkUrl = project.live && project.live !== "#" ? project.live : undefined;
+  const linkUrl =
+    project.live && project.live !== "#" ? project.live : undefined;
   const imageOrientation = project.imageOrientation ?? "landscape";
   const imageFit = project.imageFit ?? "cover";
   const imageScale = project.imageScale ?? 1.06;
   const imageHoverScale = project.imageHoverScale ?? 1.03;
-  const verticalAlignmentClass = imageRight ? "md:ml-auto md:mr-0" : "md:mr-auto md:ml-0";
+  const verticalAlignmentClass = imageRight
+    ? "md:ml-auto md:mr-0"
+    : "md:mr-auto md:ml-0";
 
   const strips = Array.from({ length: STRIP_COUNT }, (_, i) => i);
   const stripHeightPct = 100 / STRIP_COUNT;
@@ -212,8 +238,17 @@ function VenetianCard({ project, index }: { project: Project; index: number }) {
     >
       <div>
         {linkUrl ? (
-          <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="block">{imageBlock}</a>
-        ) : imageBlock}
+          <a
+            href={linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+          >
+            {imageBlock}
+          </a>
+        ) : (
+          imageBlock
+        )}
       </div>
       <ProjectText project={project} />
     </motion.article>
@@ -263,7 +298,10 @@ function MobileCardList() {
                 </h3>
                 <div className="flex gap-2 mt-1.5 flex-wrap">
                   {p.tags.map((t) => (
-                    <span key={t} className="font-poppins text-[10px] tracking-widest uppercase text-cream/50">
+                    <span
+                      key={t}
+                      className="font-poppins text-[10px] tracking-widest uppercase text-cream/50"
+                    >
                       {t}
                     </span>
                   ))}
@@ -319,16 +357,32 @@ function DesktopCardDeck() {
           return (
             <motion.div
               key={p.id}
-              animate={{ x: pos.x, y: pos.y, rotate: pos.rotate, zIndex: pos.zIndex }}
+              animate={{
+                x: pos.x,
+                y: pos.y,
+                rotate: pos.rotate,
+                zIndex: pos.zIndex,
+              }}
               transition={{
                 type: "spring",
                 stiffness: 200,
                 damping: 24,
-                delay: fanned ? i * 0.06 : (OTHER_PROJECTS.length - 1 - i) * 0.04,
+                delay: fanned
+                  ? i * 0.06
+                  : (OTHER_PROJECTS.length - 1 - i) * 0.04,
               }}
-              whileHover={fanned ? { y: pos.y - 14, scale: 1.04, zIndex: 10 } : {}}
+              whileHover={
+                fanned ? { y: pos.y - 14, scale: 1.04, zIndex: 10 } : {}
+              }
               className="absolute cursor-pointer"
-              style={{ width: cardW, height: cardH, top: 0, left: 0, borderRadius: 12, overflow: "hidden" }}
+              style={{
+                width: cardW,
+                height: cardH,
+                top: 0,
+                left: 0,
+                borderRadius: 12,
+                overflow: "hidden",
+              }}
             >
               {p.image && (
                 <img
@@ -354,7 +408,10 @@ function DesktopCardDeck() {
                   </h3>
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {p.tags.map((t) => (
-                      <span key={t} className="font-poppins text-[10px] tracking-widest uppercase text-cream/50">
+                      <span
+                        key={t}
+                        className="font-poppins text-[10px] tracking-widest uppercase text-cream/50"
+                      >
                         {t}
                       </span>
                     ))}

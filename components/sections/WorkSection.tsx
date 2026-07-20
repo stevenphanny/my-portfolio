@@ -22,7 +22,10 @@ const headingVariants = {
   show: {
     clipPath: "inset(0 0 0% 0)",
     y: 0,
-    transition: { duration: 0.75, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+    transition: {
+      duration: 0.75,
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+    },
   },
 };
 
@@ -49,7 +52,10 @@ const tagVariants = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.35, ease: [0.25, 0, 0, 1] as [number, number, number, number] },
+    transition: {
+      duration: 0.35,
+      ease: [0.25, 0, 0, 1] as [number, number, number, number],
+    },
   },
 };
 
@@ -62,12 +68,9 @@ function ProjectLinks({ project }: { project: Project }) {
           href={project.live}
           target="_blank"
           rel="noopener noreferrer"
-          className="group inline-flex items-center gap-1.5 font-poppins text-xs text-navy/60 transition-colors duration-200 hover:text-navy"
+          className="inline-flex items-center font-poppins text-xs text-navy/60 transition-colors duration-200 hover:text-navy"
         >
           Live
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-            <path d="M7 17L17 7M7 7h10v10" />
-          </svg>
         </a>
       )}
       {project.github && project.github !== "#" && (
@@ -78,7 +81,17 @@ function ProjectLinks({ project }: { project: Project }) {
           className="group inline-flex items-center gap-1.5 font-poppins text-xs text-navy/60 transition-colors duration-200 hover:text-navy"
         >
           GitHub
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          >
             <path d="M7 17L17 7M7 7h10v10" />
           </svg>
         </a>
@@ -91,7 +104,9 @@ function ProjectLinks({ project }: { project: Project }) {
 function ProjectText({ project }: { project: Project }) {
   return (
     <div className="flex flex-col justify-center gap-4">
-      <p className="font-poppins text-xs tracking-[0.3em] uppercase text-navy/30">{project.id}</p>
+      <p className="font-poppins text-xs tracking-[0.3em] uppercase text-navy/30">
+        {project.id}
+      </p>
       <h3 className="font-instrument-serif text-3xl md:text-4xl text-navy leading-tight">
         {project.title}
       </h3>
@@ -110,7 +125,9 @@ function ProjectText({ project }: { project: Project }) {
           </motion.li>
         ))}
       </motion.ul>
-      <p className="font-lora text-sm text-navy/65 leading-relaxed">{project.desc}</p>
+      <p className="font-lora text-sm text-navy/65 leading-relaxed">
+        {project.desc}
+      </p>
       <ProjectLinks project={project} />
     </div>
   );
@@ -121,10 +138,17 @@ function ProjectText({ project }: { project: Project }) {
 // Navy cover with cream title sits over the screenshot.
 // Hover wipes the cover away left-to-right, revealing the screenshot beneath.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function CoverRevealCard({ project, index }: { project: Project; index: number }) {
+function CoverRevealCard({
+  project,
+  index,
+}: {
+  project: Project;
+  index: number;
+}) {
   const [hovered, setHovered] = useState(false);
   const imageRight = index % 2 !== 0;
-  const linkUrl = project.live && project.live !== "#" ? project.live : undefined;
+  const linkUrl =
+    project.live && project.live !== "#" ? project.live : undefined;
 
   const imageBlock = (
     <div
@@ -182,7 +206,12 @@ function CoverRevealCard({ project, index }: { project: Project; index: number }
     >
       <div>
         {linkUrl ? (
-          <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="block">
+          <a
+            href={linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+          >
             {imageBlock}
           </a>
         ) : (
@@ -201,7 +230,8 @@ function CoverRevealCard({ project, index }: { project: Project; index: number }
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function TintedCard({ project, index }: { project: Project; index: number }) {
   const imageRight = index % 2 !== 0;
-  const linkUrl = project.live && project.live !== "#" ? project.live : undefined;
+  const linkUrl =
+    project.live && project.live !== "#" ? project.live : undefined;
 
   const imageBlock = (
     <motion.div
@@ -257,7 +287,12 @@ function TintedCard({ project, index }: { project: Project; index: number }) {
     >
       <div>
         {linkUrl ? (
-          <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="block">
+          <a
+            href={linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+          >
             {imageBlock}
           </a>
         ) : (
@@ -285,7 +320,8 @@ function EditorialRow({
   onHover: () => void;
   onLeave: () => void;
 }) {
-  const linkUrl = project.live && project.live !== "#" ? project.live : undefined;
+  const linkUrl =
+    project.live && project.live !== "#" ? project.live : undefined;
 
   return (
     <motion.article
@@ -415,7 +451,6 @@ function EditorialList({ projects }: { projects: Project[] }) {
 export function WorkSection() {
   return (
     <div className="mx-auto w-full max-w-5xl px-6 md:px-12 py-4">
-
       {/* Divider */}
       <motion.div
         initial={{ scaleX: 0 }}
@@ -449,7 +484,7 @@ export function WorkSection() {
               <CoverRevealCard key={p.id} project={p} index={i} />
             ) : (
               <TintedCard key={p.id} project={p} index={i} />
-            )
+            ),
           )}
         </div>
       )}

@@ -1,9 +1,9 @@
 %-------------------------
-% Resume in Latex
-% Author : Steven Phan
+% Resume in LaTeX
+% Author: Steven Phan
 % Based off of: https://github.com/sb2nov/resume
-% License : MIT
-%------------------------
+% License: MIT
+%-------------------------
 
 \documentclass[letterpaper,11pt]{article}
 
@@ -20,7 +20,6 @@
 \usepackage{tabularx}
 \input{glyphtounicode}
 
-
 %----------FONT OPTIONS----------
 % sans-serif
 % \usepackage[sfdefault]{FiraSans}
@@ -32,9 +31,8 @@
 % \usepackage{CormorantGaramond}
 % \usepackage{charter}
 
-
 \pagestyle{fancy}
-\fancyhf{} % clear all header and footer fields
+\fancyhf{}
 \fancyfoot{}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
@@ -43,8 +41,8 @@
 \addtolength{\oddsidemargin}{-0.5in}
 \addtolength{\evensidemargin}{-0.5in}
 \addtolength{\textwidth}{1in}
-\addtolength{\topmargin}{-.5in}
-\addtolength{\textheight}{1.0in}
+\addtolength{\topmargin}{-0.6in}
+\addtolength{\textheight}{1.15in}
 
 \urlstyle{same}
 
@@ -54,17 +52,18 @@
 
 % Sections formatting
 \titleformat{\section}{
-  \vspace{-4pt}\scshape\raggedright\large
-}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+  \vspace{-5pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-4pt}]
 
-% Ensure that generated PDF is machine readable/ATS parsable
+% Ensure generated PDF is machine readable / ATS parsable
 \pdfgentounicode=1
 
 %-------------------------
 % Custom commands
+
 \newcommand{\resumeItem}[1]{
   \item\small{
-    {#1 \vspace{-2pt}}
+    {#1 \vspace{-1pt}}
   }
 }
 
@@ -72,141 +71,160 @@
   \vspace{-2pt}\item
     \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
       \textbf{#1} & #2 \\
-      \textit{\small#3} & \textit{\small #4} \\
-    \end{tabular*}\vspace{-7pt}
-}
-
-\newcommand{\resumeSubSubheading}[2]{
-    \item
-    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
-      \textit{\small#1} & \textit{\small #2} \\
-    \end{tabular*}\vspace{-7pt}
+      \textit{\small #3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-4pt}
 }
 
 \newcommand{\resumeProjectHeading}[2]{
-    \item
+  \item
     \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
-      \small#1 & #2 \\
-    \end{tabular*}\vspace{-7pt}
+      \small #1 & #2 \\
+    \end{tabular*}\vspace{-4pt}
 }
 
-\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+\renewcommand\labelitemii{
+  $\vcenter{\hbox{\tiny$\bullet$}}$
+}
 
-\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\newcommand{\resumeSubHeadingListStart}{
+  \begin{itemize}[leftmargin=0.15in, label={}, itemsep=2pt, topsep=2pt, parsep=0pt, partopsep=0pt]
+}
 
-\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
-\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
-\newcommand{\resumeItemListStart}{\begin{itemize}}
-\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+\newcommand{\resumeSubHeadingListEnd}{
+  \end{itemize}
+}
+
+\newcommand{\resumeItemListStart}{
+  \begin{itemize}[leftmargin=0.22in, itemsep=1pt, topsep=2pt, parsep=0pt, partopsep=0pt]
+}
+
+\newcommand{\resumeItemListEnd}{
+  \end{itemize}\vspace{-3pt}
+}
 
 %-------------------------------------------
-%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+% Resume starts here
 
 \begin{document}
 
 %----------HEADING----------
+
 \begin{center}
     \textbf{\Huge \scshape Steven Phan} \\ \vspace{1pt}
-    \small Ph: 0468-922-999 $|$ {stevenphan@outlook.com.au} $|$
+    \small
+    Ph: 0468-922-999 $|$
+    \href{mailto:stevenphan@outlook.com.au}{\underline{stevenphan@outlook.com.au}} $|$
     \href{https://stevenphanny.com}{\underline{Portfolio}} $|$
     \href{https://www.linkedin.com/in/steven-phan-b3883a233/}{\underline{LinkedIn}} $|$
-    \href{https://github.com/stevenphanny}{\underline{github.com/stevenphanny}}
-
+    \href{https://github.com/stevenphanny}{\underline{GitHub}}
     \vspace{-8pt}
 \end{center}
 
 %-----------EDUCATION-----------
 \section{Education}
-  \resumeSubHeadingListStart
-    \resumeSubheading
-      {Monash University}{Melbourne, VIC, Australia}
-      {Bachelor of Software Engineering (Honours)}{Jan. 2024 -- Expected Nov. 2027}
-  \resumeSubHeadingListEnd
+\resumeSubHeadingListStart
+  \resumeSubheading
+    {Monash University}
+    {Melbourne, VIC, Australia}
+    {Bachelor of Software Engineering (Honours)}
+    {Jan. 2024 -- Expected 2028}
+\resumeSubHeadingListEnd
 
 %-----------ACHIEVEMENTS-----------
 \section{Selected Achievements}
-  \resumeSubHeadingListStart
-    \resumeProjectHeading
-      {\textbf{UNIHACK 2026} $|$ \emph{\textbf{6th of 183 teams} at a 1,000+ participant university hackathon}}{Mar. 2026}
-  \resumeSubHeadingListEnd
+\resumeSubHeadingListStart
+  \resumeProjectHeading
+    {\textbf{UNIHACK 2026} $|$ \emph{\textbf{6th of 183 teams} at a 1,000+ participant university hackathon}}
+    {Mar. 2026}
+\resumeSubHeadingListEnd
 
 %-----------TECHNICAL EXPERIENCE-----------
 \section{Technical Experience}
-  \resumeSubHeadingListStart
-    \resumeSubheading
-      {Full-Stack Project Officer}{Oct. 2025 -- Present}
-      {Monash Association of Coding (MAC) -- Monash's largest student coding club}{}
-      \resumeItemListStart
-        \resumeItem{Ship full-stack features across \textbf{monashcoding.com} and the \textbf{MAC Job Board}, supporting event discovery, sponsorship visibility, recruitment, and student career access}
-        \resumeItem{Maintain Job Board features for a live careers product serving \textbf{1,000 monthly visitors} and indexing roughly \textbf{1,440 scraped job listings}}
-        \resumeItem{Collaborate with MAC engineers through scoped issues, pull requests, structured code reviews, and production-focused release iteration}
-      \resumeItemListEnd
-      \vspace{+4pt}
+\resumeSubHeadingListStart
 
-    \resumeSubheading
-      {Autonomous Vehicle Software Engineer}{Mar. 2025 -- Dec. 2025}
-      {Monash Connected Autonomous Vehicle (MCAV) -- ESDA Team}{}
-      \resumeItemListStart
-        \resumeItem{Built ROS2 Python nodes for LiDAR and ZED stereo-camera processing on a custom electric autonomous vehicle that placed \textbf{1st in the Design Competition} at IGVC 2025}
-      \resumeItemListEnd
-      \vspace{+4pt}
+  \resumeSubheading
+    {Software Engineering Intern}
+    {Jul. 2026 -- Nov. 2026}
+    {Coles Group -- Identity \& Access Management}
+    {Melbourne, VIC}
+  \resumeItemListStart
+    \resumeItem{Support enterprise IAM systems for thousands of Coles employees across Microsoft Azure, Active Directory, and Microsoft Entra ID (Azure AD)}
+    \resumeItem{Contribute to identity lifecycle automation, account provisioning, access governance, and enterprise cybersecurity operations}
+  \resumeItemListEnd
+  \vspace{4pt}
 
-    \resumeSubheading
-      {Android / Kotlin Project Officer}{Aug. 2024 -- Jan. 2025}
-      {Monash Assistive Tech Team (MATT)}{}
-      \resumeItemListStart
-        \resumeItem{Prototyped a Kotlin Android navigation app using BLE beacon trilateration to support audio-guided indoor navigation for low-vision users}
-      \resumeItemListEnd
-  \resumeSubHeadingListEnd
+  \resumeSubheading
+    {Full-Stack Project Officer}
+    {Oct. 2025 -- Present}
+    {Monash Association of Coding (MAC) -- Australia's largest university coding club}
+    {}
+  \resumeItemListStart
+    \resumeItem{Ship full-stack features across \textbf{monashcoding.com} and the \textbf{MAC Job Board}, supporting event discovery, sponsorship visibility, recruitment, and student career access}
+    \resumeItem{Maintain Job Board features for a live careers product serving \textbf{1,000 monthly visitors} and indexing roughly \textbf{1,440 scraped job listings}}
+    \resumeItem{Collaborate with technical and non-technical teams to scope, implement, review, and release product improvements}
+  \resumeItemListEnd
+  \vspace{4pt}
 
+  \resumeSubheading
+    {Autonomous Vehicle Software Engineer}
+    {Mar. 2025 -- Dec. 2025}
+    {Monash Connected Autonomous Vehicle (MCAV) -- ESDA Team}
+    {}
+  \resumeItemListStart
+    \resumeItem{Built ROS2 Python nodes for LiDAR and ZED stereo-camera processing on a custom electric autonomous vehicle that placed \textbf{1st in the Design Competition} at IGVC 2025}
+  \resumeItemListEnd
+
+\resumeSubHeadingListEnd
 
 %-----------PROJECTS-----------
 \section{Selected Projects}
-  \resumeSubHeadingListStart
-    % MAC JOB BOARD
-    \resumeProjectHeading
-      {\textbf{MAC Job Board} $|$ \emph{Next.js, TypeScript, Tailwind CSS, Product Analytics}}
-      {2026 \quad \href{https://jobs.monashcoding.com/jobs}{[Live]}}
-      \resumeItemListStart
-        \resumeItem{Developed a student careers board connecting Monash students with internship, graduate, and technology roles from industry partners}
-        \resumeItem{Scaled discovery for roughly \textbf{1,440 scraped job listings}, using searchable listings, role tags, filters, and responsive job cards to make high-volume results easier to scan}
-        \resumeItem{Used product analytics from \textbf{1,000 monthly visitors} to prioritize navigation, filtering, and mobile UX improvements around real student traffic}
-      \resumeItemListEnd
-      \vspace{+4pt}
+\resumeSubHeadingListStart
 
-    % BEESAFE - UNIHACK 2026
-    \resumeProjectHeading
-      {\textbf{BeeSafe} $|$ \emph{TanStack Start, React 19, YOLOv8, MediaPipe, AWS, PostgreSQL}}
-      {2026 \quad \href{https://devpost.com/software/beesafe-njd4hi}{[Devpost]}}
-      \resumeItemListStart
-        \resumeItem{Built a web-native driving safety platform in \textbf{48 hours} at UNIHACK 2026, placing \textbf{6th of 183 teams}}
-        \resumeItem{Implemented real-time in-browser computer vision with MediaPipe and YOLOv8 via ONNX Runtime and WebGPU for driver drowsiness and road-hazard detection}
-        \resumeItem{Engineered crash detection from mobile device motion and G-force signals, triggering emergency calls with precise GPS coordinates and AI-generated voice alerts via AWS Polly}
-      \resumeItemListEnd
-      \vspace{+4pt}
+  % MAC JOB BOARD
+  \resumeProjectHeading
+    {\textbf{MAC Job Board} $|$ \emph{Next.js, TypeScript, Tailwind CSS, Product Analytics}}
+    {\href{https://jobs.monashcoding.com/jobs}{[Live]}}
+  \resumeItemListStart
+    \resumeItem{Developed a student careers board connecting Monash students with internship, graduate, and technology roles from industry partners}
+    \resumeItem{Scaled discovery for roughly \textbf{1,440 scraped job listings} with searchable listings, role tags, filters, and responsive job cards for high-volume browsing}
+    \resumeItem{Used analytics from \textbf{1,000 monthly visitors} to prioritize navigation, filtering, and mobile UX improvements around real student traffic}
+  \resumeItemListEnd
+  \vspace{4pt}
 
-    % MAC WEBSITE
-    \resumeProjectHeading
-      {\textbf{Monash Association of Coding Website} $|$ \emph{Next.js, TypeScript, Tailwind CSS, Framer Motion}}
-      {2026 \quad \href{https://www.monashcoding.com/}{[Live]}}
-      \resumeItemListStart
-        \resumeItem{Contributed to a ground-up rebuild of monashcoding.com, the public-facing site for Australia's largest university coding club}
-        \resumeItem{Built reusable animated UI components for event, membership, sponsorship, and recruitment pages within a component-driven design system}
-      \resumeItemListEnd
-  \resumeSubHeadingListEnd
+  % BEESAFE
+  \resumeProjectHeading
+    {\textbf{BeeSafe} $|$ \emph{TanStack Start, React 19, YOLOv8, MediaPipe, AWS, PostgreSQL}}
+    {\href{https://devpost.com/software/beesafe-njd4hi}{[Devpost]}}
+  \resumeItemListStart
+    \resumeItem{Built a web-native driving safety platform in \textbf{48 hours} at UNIHACK 2026, placing \textbf{6th of 183 teams}}
+    \resumeItem{Implemented real-time in-browser computer vision with MediaPipe and YOLOv8 via ONNX Runtime and WebGPU for driver drowsiness and road-hazard detection}
+    \resumeItem{Engineered crash detection from mobile motion and G-force signals, triggering emergency calls with GPS coordinates and AWS Polly voice alerts}
+  \resumeItemListEnd
+  \vspace{4pt}
+
+  % MAC WEBSITE
+  \resumeProjectHeading
+    {\textbf{MAC Website Redesign} $|$ \emph{Next.js, TypeScript, Tailwind CSS, Framer Motion}}
+    {\href{https://www.monashcoding.com/}{[Live]}}
+  \resumeItemListStart
+    \resumeItem{Contributed to a ground-up rebuild of monashcoding.com, the public-facing site for Australia's largest university coding club}
+    \resumeItem{Implemented reusable section components and Framer Motion reveal patterns across event, membership, sponsorship, and recruitment pages}
+  \resumeItemListEnd
+
+\resumeSubHeadingListEnd
 
 %-----------TECHNICAL SKILLS-----------
 \section{Technical Skills}
- \begin{itemize}[leftmargin=0.15in, label={}]
-    \small{\item{
-     \textbf{Languages}{: TypeScript, JavaScript, Python, Java, Kotlin, SQL, HTML/CSS} \\
-     \textbf{Frameworks / Platforms}{: React, Next.js, Tailwind CSS, TanStack Start, ROS2, Android SDK, Supabase} \\
-     \textbf{Tools}{: Git/GitHub, PostgreSQL, AWS, Linux, VS Code, IntelliJ, Android Studio} \\
-     \textbf{Concepts}{: Data Structures, Algorithms, Full-Stack Development, Computer Vision, Accessibility, Agile Practices}
-    }}
- \end{itemize}
-
+\begin{itemize}[leftmargin=0.15in, label={}, itemsep=0pt, topsep=0pt, parsep=0pt, partopsep=0pt]
+  \small{
+    \item{
+      \textbf{Languages}{: TypeScript, JavaScript, Python, Java, Kotlin, SQL, HTML/CSS} \\
+      \textbf{Frameworks / Platforms}{: React, Next.js, Tailwind CSS, TanStack Start, ROS2, Android SDK} \\
+      \textbf{Tools}{: Microsoft Azure, Microsoft Entra ID / Azure AD, Active Directory, AWS, PostgreSQL, Git/GitHub, Linux} \\
+      \textbf{Concepts}{: Identity and Access Management, Identity Management, Cybersecurity, Full-Stack Development, Data Structures and Algorithms, Accessibility, Agile Practices}
+    }
+  }
+\end{itemize}
 
 %-------------------------------------------
 \end{document}
