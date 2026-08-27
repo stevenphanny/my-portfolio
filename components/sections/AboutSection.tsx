@@ -1,17 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
-import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AboutBio } from "./about/AboutBio";
 import { GitGraph } from "./about/GitGraph";
 import { NodePanel } from "./about/NodePanel";
 import { TIMELINE, type TimelineEvent } from "./about/timelineData";
+import { PanelImagePreloader } from "./about/PanelImagePreloader";
 import { ImageTrailClient } from "./ImageTrailClient";
-import { isSanityImageUrl, sanityImageLoader } from "./imageLoading";
-
-const PANEL_PRELOAD_ROOT_MARGIN = "900px 0px";
-const MAX_PANEL_PRELOAD_IMAGES = 24;
 
 export function AboutSection({
   timeline = TIMELINE,
@@ -22,18 +18,7 @@ export function AboutSection({
 }) {
   const [hoveredEvent, setHoveredEvent] = useState<TimelineEvent | null>(null);
   const [lockedEvent, setLockedEvent] = useState<TimelineEvent | null>(null);
-  const [shouldPreloadPanelImages, setShouldPreloadPanelImages] =
-    useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const panelImages = useMemo(() => {
-    const imageSet = new Set<string>();
-    timeline.forEach((event) => {
-      event.panel?.images?.forEach((src) => {
-        if (src) imageSet.add(src);
-      });
-    });
-    return Array.from(imageSet);
-  }, [timeline]);
 
   // Auto-unlock when the section scrolls fully out of view
   useEffect(() => {
@@ -49,33 +34,6 @@ export function AboutSection({
     return () => window.removeEventListener("scroll", onScroll);
   }, [lockedEvent]);
 
-  useEffect(() => {
-    if (shouldPreloadPanelImages || panelImages.length === 0) return;
-
-    const el = sectionRef.current;
-    if (!el) return;
-
-    if (typeof IntersectionObserver === "undefined") {
-      const timer = window.setTimeout(
-        () => setShouldPreloadPanelImages(true),
-        0,
-      );
-      return () => window.clearTimeout(timer);
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        setShouldPreloadPanelImages(true);
-        observer.disconnect();
-      },
-      { rootMargin: PANEL_PRELOAD_ROOT_MARGIN },
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [panelImages.length, shouldPreloadPanelImages]);
-
   function handleNodeClick(ev: TimelineEvent) {
     // Use branch+event as composite key so same-named nodes (e.g. "What's next...") don't collide
     setLockedEvent((prev) =>
@@ -88,9 +46,7 @@ export function AboutSection({
 
   return (
     <div ref={sectionRef} className="relative w-full flex flex-col">
-      {shouldPreloadPanelImages && (
-        <NodePanelImagePreloads images={panelImages} />
-      )}
+      <PanelImagePreloader timeline={timeline} targetRef={sectionRef} />
       <div className="mx-auto w-full max-w-6xl px-6 md:px-12 py-16 md:py-24">
         <div className="flex flex-col md:flex-row gap-16 md:gap-0">
           {/* Left — Git-graph timeline */}
@@ -149,37 +105,6 @@ export function AboutSection({
           <ImageTrailClient images={trailImages} />
         </div>
       )}
-    </div>
-  );
-}
-
-function NodePanelImagePreloads({ images }: { images: string[] }) {
-  if (images.length === 0) return null;
-
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute left-0 top-0 h-px w-px overflow-hidden opacity-0"
-    >
-      {images.slice(0, MAX_PANEL_PRELOAD_IMAGES).map((src) => {
-        const imageProps = isSanityImageUrl(src)
-          ? { loader: sanityImageLoader }
-          : {};
-
-        return (
-          <Image
-            key={src}
-            src={src}
-            alt=""
-            width={640}
-            height={480}
-            loading="eager"
-            fetchPriority="low"
-            sizes="640px"
-            {...imageProps}
-          />
-        );
-      })}
     </div>
   );
 }
