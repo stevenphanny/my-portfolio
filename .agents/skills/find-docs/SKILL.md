@@ -1,33 +1,26 @@
 ---
 name: find-docs
 description: >-
-  Retrieves up-to-date documentation, API references, and code examples for any
-  developer technology. Use this skill whenever the user asks about a specific
-  library, framework, SDK, CLI tool, or cloud service -- even for well-known ones
-  like React, Next.js, Prisma, Express, Tailwind, Django, or Spring Boot. Your
-  training data may not reflect recent API changes or version updates.
-
-  Always use for: API syntax questions, configuration options, version migration
-  issues, "how do I" questions mentioning a library name, debugging that involves
-  library-specific behavior, setup instructions, and CLI tool usage.
-
-  Use even when you think you know the answer -- do not rely on training data
-  for API details, signatures, or configuration options as they are frequently
-  outdated. Always verify against current docs. Prefer this over web search for
-  library documentation and API details.
+  Retrieve current documentation, API references, and code examples for developer
+  technologies. Use for library-specific syntax, configuration, setup, migration,
+  CLI usage, or debugging. Prefer primary documentation returned by Context7.
 ---
 
 # Documentation Lookup
 
-Retrieve current documentation and code examples for any library using the Context7 CLI.
+Retrieve current documentation and code examples using the configured Context7 MCP server. Use the CLI only when those tools are unavailable.
 
-Make sure the CLI is up to date before running commands:
+## Preferred: Context7 MCP
 
-```bash
-npm install -g ctx7@latest
-```
+1. Call `mcp__context7__resolve_library_id` with the library name and the user's specific question.
+2. Select the closest official package, respecting any requested version.
+3. Call `mcp__context7__query_docs` with the selected library ID and the focused question.
 
-Or run directly without installing:
+Do not send secrets, credentials, personal data, or proprietary code to the documentation service.
+
+## Fallback: Context7 CLI
+
+If the MCP tools are unavailable, run the CLI without installing it globally:
 
 ```bash
 npx ctx7@latest <command>
@@ -45,9 +38,9 @@ ctx7 library <name> <query>
 ctx7 docs <libraryId> <query>
 ```
 
-You MUST call `ctx7 library` first to obtain a valid library ID UNLESS the user explicitly provides a library ID in the format `/org/project` or `/org/project/version`.
+You MUST resolve the library first unless the user explicitly provides an ID in the format `/org/project` or `/org/project/version`.
 
-IMPORTANT: Do not run these commands more than 3 times per question. If you cannot find what you need after 3 attempts, use the best result you have.
+Do not make more than three Context7 resolution/query attempts per question. If the service still cannot answer, use an official primary source when available and clearly identify the fallback.
 
 ## Step 1: Resolve a Library
 
@@ -139,10 +132,10 @@ ctx7 login
 
 ## Error Handling
 
-If a command fails with a quota error ("Monthly quota reached" or "quota exceeded"):
+If the MCP tool or CLI fails with a quota error ("Monthly quota reached" or "quota exceeded"):
 1. Inform the user their Context7 quota is exhausted
 2. Suggest they authenticate for higher limits: `ctx7 login`
-3. If they cannot or choose not to authenticate, answer from training knowledge and clearly note it may be outdated
+3. If they cannot or choose not to authenticate, use current official documentation when accessible; otherwise answer from existing knowledge and clearly note that it may be outdated
 
 Do not silently fall back to training data — always tell the user why Context7 was not used.
 

@@ -18,7 +18,7 @@ Activate this skill when the user:
 
 ### Step 1: Resolve the Library ID
 
-Call `resolve-library-id` with:
+Call the configured Context7 MCP tool `mcp__context7__resolve_library_id` with:
 
 - `libraryName`: The library name extracted from the user's question
 - `query`: The user's full question (improves relevance ranking)
@@ -33,7 +33,7 @@ From the resolution results, choose based on:
 
 ### Step 3: Fetch the Documentation
 
-Call `query-docs` with:
+Call `mcp__context7__query_docs` with:
 
 - `libraryId`: The selected Context7 library ID (e.g., `/vercel/next.js`)
 - `query`: The user's specific question
@@ -51,3 +51,4 @@ Incorporate the fetched documentation into your response:
 - **Be specific**: Pass the user's full question as the query for better results
 - **Version awareness**: When users mention versions ("Next.js 15", "React 19"), use version-specific library IDs if available from the resolution step
 - **Prefer official sources**: When multiple matches exist, prefer official/primary packages over community forks
+- **Tool availability**: If the Context7 MCP tools are unavailable, use the `find-docs` skill's CLI fallback instead of inventing tool calls

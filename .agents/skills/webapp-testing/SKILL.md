@@ -1,38 +1,39 @@
 ---
 name: webapp-testing
-description: Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.
+description: Test local web applications with Playwright MCP or native Playwright scripts. Use for frontend verification, UI debugging, browser screenshots, interaction checks, and console-log inspection.
 license: Complete terms in LICENSE.txt
 ---
 
 # Web Application Testing
 
-To test local web applications, write native Python Playwright scripts.
+Use the configured Playwright MCP tools for ordinary browser inspection and interaction. Write a native Python Playwright script only when the task needs a repeatable multi-step automation artifact or capabilities unavailable through MCP.
 
 **Helper Scripts Available**:
 - `scripts/with_server.py` - Manages server lifecycle (supports multiple servers)
 
-**Always run scripts with `--help` first** to see usage. DO NOT read the source until you try running the script first and find that a customized solution is abslutely necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
+Run helper scripts with `--help` first. Treat them as black boxes unless a failure requires inspection or customization.
 
 ## Decision Tree: Choosing Your Approach
 
 ```
-User task → Is it static HTML?
-    ├─ Yes → Read HTML file directly to identify selectors
-    │         ├─ Success → Write Playwright script using selectors
-    │         └─ Fails/Incomplete → Treat as dynamic (below)
-    │
-    └─ No (dynamic webapp) → Is the server already running?
-        ├─ No → Run: python scripts/with_server.py --help
-        │        Then use the helper + write simplified Playwright script
-        │
-        └─ Yes → Reconnaissance-then-action:
-            1. Navigate and wait for networkidle
-            2. Take screenshot or inspect DOM
-            3. Identify selectors from rendered state
-            4. Execute actions with discovered selectors
+User task -> Is the app already running?
+    |-- Yes -> Use Playwright MCP reconnaissance, then interact and verify
+    `-- No  -> Start it with the repository's documented command
+               |-- For an interactive check, keep the server session and use MCP
+               `-- For repeatable automation, use scripts/with_server.py
 ```
 
-## Example: Using with_server.py
+## Preferred: Playwright MCP
+
+1. Navigate with `mcp__playwright__browser_navigate`.
+2. Inspect semantic page state with `mcp__playwright__browser_snapshot`; use screenshots when visual layout matters.
+3. Interact using role- or label-based tools such as `browser_click`, `browser_fill_form`, and `browser_press_key`.
+4. Inspect `browser_console_messages` and network requests when debugging.
+5. Re-snapshot or capture a screenshot after the action to verify the observable result.
+
+Use the exact tool names exposed by the current Codex session; MCP prefixes can vary across installations. If the configured Playwright MCP server is unavailable, use the native-script fallback below.
+
+## Native-script fallback: using with_server.py
 
 To start a server, run `--help` first, then use the helper:
 
@@ -64,9 +65,12 @@ with sync_playwright() as p:
 
 ## Reconnaissance-Then-Action Pattern
 
-1. **Inspect rendered DOM**:
+1. **Inspect rendered DOM or semantic snapshot**:
    ```python
-   page.screenshot(path='/tmp/inspect.png', full_page=True)
+   from pathlib import Path
+   from tempfile import gettempdir
+
+   page.screenshot(path=str(Path(gettempdir()) / 'inspect.png'), full_page=True)
    content = page.content()
    page.locator('button').all()
    ```
@@ -77,13 +81,14 @@ with sync_playwright() as p:
 
 ## Common Pitfall
 
-❌ **Don't** inspect the DOM before waiting for `networkidle` on dynamic apps
-✅ **Do** wait for `page.wait_for_load_state('networkidle')` before inspection
+**Don't** inspect the DOM before waiting for `networkidle` on dynamic apps.
+**Do** wait for `page.wait_for_load_state('networkidle')` before inspection.
 
 ## Best Practices
 
 - **Use bundled scripts as black boxes** - To accomplish a task, consider whether one of the scripts available in `scripts/` can help. These scripts handle common, complex workflows reliably without cluttering the context window. Use `--help` to see usage, then invoke directly. 
-- Use `sync_playwright()` for synchronous scripts
+- Prefer Playwright MCP for one-off interactive checks
+- Use `sync_playwright()` for synchronous automation scripts
 - Always close the browser when done
 - Use descriptive selectors: `text=`, `role=`, CSS selectors, or IDs
 - Add appropriate waits: `page.wait_for_selector()` or `page.wait_for_timeout()`

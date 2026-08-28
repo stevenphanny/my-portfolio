@@ -1,4 +1,6 @@
 from playwright.sync_api import sync_playwright
+from pathlib import Path
+from tempfile import gettempdir
 
 # Example: Capturing console logs during browser automation
 
@@ -27,9 +29,12 @@ with sync_playwright() as p:
 
     browser.close()
 
-# Save console logs to file
-with open('/mnt/user-data/outputs/console.log', 'w') as f:
+# Save console logs to a cross-platform temporary directory
+output_dir = Path(gettempdir()) / 'webapp-testing'
+output_dir.mkdir(parents=True, exist_ok=True)
+log_path = output_dir / 'console.log'
+with log_path.open('w', encoding='utf-8') as f:
     f.write('\n'.join(console_logs))
 
 print(f"\nCaptured {len(console_logs)} console messages")
-print(f"Logs saved to: /mnt/user-data/outputs/console.log")
+print(f"Logs saved to: {log_path}")

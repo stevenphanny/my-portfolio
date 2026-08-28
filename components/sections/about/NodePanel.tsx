@@ -4,17 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import type { TimelineEvent, NodePanel as NodePanelData } from "./timelineData";
 import { isSanityImageUrl, sanityImageLoader } from "../imageLoading";
+import { PANEL_IMAGE_SIZES, resolvePanelImageLayout } from "./panelImagePreload";
 
 const PANEL_SIZE = {
   small: "w-[110%] min-h-[300px]",
   medium: "w-[155%] min-h-[580px]",
   large: "w-[155%] min-h-[580px]",
-};
-
-const PANEL_IMAGE_SIZES = {
-  hero: "(min-width: 768px) 56rem, calc(100vw - 3rem)",
-  grid: "(min-width: 768px) 28rem, calc((100vw - 4rem) / 2)",
-  strip: "11rem",
 };
 
 export function NodePanel({
@@ -89,7 +84,7 @@ function ImageLayout({
   layout?: NodePanelData["layout"];
   imageFit?: NodePanelData["imageFit"];
 }) {
-  const mode = layout ?? (images.length === 1 ? "hero" : "grid");
+  const mode = resolvePanelImageLayout(images, layout);
   const imageClassName =
     imageFit === "contain" ? "object-contain p-1" : "object-cover";
   const frameClassName = imageFit === "contain" ? "bg-navy/5" : "";
