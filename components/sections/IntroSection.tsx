@@ -78,7 +78,12 @@ function HeroLetter({
   }
 
   return (
-    <motion.span ref={ref} className="inline-block" style={{ y }}>
+    <motion.span
+      ref={ref}
+      data-cursor-text
+      className="inline-block"
+      style={{ y }}
+    >
       {char}
     </motion.span>
   );
@@ -123,7 +128,6 @@ export function IntroSection() {
 
   return (
     <div className="w-full flex flex-col items-center gap-0 text-center relative">
-
       {/* Cream wipe: sweeps in left→right over the loading screen, then exits left→right */}
       <motion.div
         aria-hidden
@@ -134,7 +138,10 @@ export function IntroSection() {
       />
 
       {/* ── Row 1: Steven Phan ───────────────────────────────────────────── */}
-      <motion.div className="overflow-hidden" style={isMobile ? {} : { x: row1X }}>
+      <motion.div
+        className="relative z-10 overflow-hidden"
+        style={isMobile ? {} : { x: row1X }}
+      >
         <motion.h1
           variants={row1Variants}
           initial="hidden"
@@ -153,7 +160,7 @@ export function IntroSection() {
       {/* ── Row 2: @stevenphanny ─────────────────────────────────────────── */}
       <motion.div
         style={isMobile ? {} : { x: row2X }}
-        className="flex flex-col items-center gap-1"
+        className="relative z-10 flex flex-col items-center gap-1"
       >
         <motion.p
           variants={row2Variants}

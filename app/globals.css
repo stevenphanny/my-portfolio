@@ -69,6 +69,39 @@ body {
   height: 100%;
 }
 
+/* Landing TV static: tune from 0 (off) to about 0.35 (strong). */
+.intro-static {
+  --intro-static-strength: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  opacity: var(--intro-static-strength);
+}
+
+/* A clipped copy of hovered text paints only the glyph pixels above the cursor. */
+.cursor-text-overlay {
+  position: fixed !important;
+  z-index: 10002 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  clip-path: circle(
+    calc(var(--cursor-size) / 2) at var(--cursor-reveal-x) var(--cursor-reveal-y)
+  ) !important;
+  pointer-events: none !important;
+  user-select: none;
+}
+
+.cursor-text-overlay,
+.cursor-text-overlay * {
+  color: var(--cursor-reveal-color) !important;
+  -webkit-text-fill-color: var(--cursor-reveal-color) !important;
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Ensure the custom cursor only applies to the portfolio, not embedded tools like Sanity Studio. */
 body.portfolio-mode,
 body.portfolio-mode *,
