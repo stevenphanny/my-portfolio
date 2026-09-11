@@ -20,7 +20,7 @@ const CURSOR_COLORS: Record<string, string> = {
 
 const ANIMATED_TEXT_SELECTOR = "[data-cursor-text]";
 const TEXT_CONTAINER_SELECTOR =
-  "h1, h2, h3, h4, h5, h6, p, a, button, label, li";
+  "h1, h2, h3, h4, h5, h6, p, blockquote, a, button, label, li";
 // Lower damping = less resistance and more bounce. Raise it for a firmer cursor.
 const CURSOR_BOUNCE_DAMPING = 5;
 const BOUNCE_SPRING = {
@@ -146,10 +146,13 @@ export function CustomCursor() {
       return overlay;
     };
 
-    const getAnimatedTextOffset = (textElement: HTMLElement) => {
+    const getAnimatedTextOffset = (
+      textElement: HTMLElement,
+      style: CSSStyleDeclaration,
+    ) => {
       if (!textElement.matches(ANIMATED_TEXT_SELECTOR)) return { x: 0, y: 0 };
 
-      const transform = window.getComputedStyle(textElement).transform;
+      const transform = style.transform;
       if (transform === "none") return { x: 0, y: 0 };
 
       const matrix = new DOMMatrixReadOnly(transform);
@@ -163,7 +166,8 @@ export function CustomCursor() {
 
       const rect = textElement.getBoundingClientRect();
       const { cx, cy } = pointerPos.current;
-      const offset = getAnimatedTextOffset(textElement);
+      const textStyle = window.getComputedStyle(textElement);
+      const offset = getAnimatedTextOffset(textElement, textStyle);
       const visualCx = cx + offset.x;
       const visualCy = cy + offset.y;
 
@@ -173,6 +177,7 @@ export function CustomCursor() {
       overlay.style.top = `${rect.top}px`;
       overlay.style.width = `${rect.width}px`;
       overlay.style.height = `${rect.height}px`;
+      overlay.style.setProperty("opacity", textStyle.opacity, "important");
       overlay.style.setProperty("--cursor-reveal-x", `${visualCx - rect.left}px`);
       overlay.style.setProperty("--cursor-reveal-y", `${visualCy - rect.top}px`);
     };
@@ -186,7 +191,7 @@ export function CustomCursor() {
       }
     };
 
-    const resolveTextElement = (target: Element | null, cx: number) => {
+    const resolveTextElement = (target: Element | null, cx: number, cy: number) => {
       const directLetter = target?.closest(
         ANIMATED_TEXT_SELECTOR,
       ) as HTMLElement | null;
@@ -208,8 +213,11 @@ export function CustomCursor() {
       }>(
         (nearest, element) => {
           const rect = element.getBoundingClientRect();
-          const distance =
+          const distanceX =
             cx < rect.left ? rect.left - cx : cx > rect.right ? cx - rect.right : 0;
+          const distanceY =
+            cy < rect.top ? rect.top - cy : cy > rect.bottom ? cy - rect.bottom : 0;
+          const distance = Math.hypot(distanceX, distanceY);
 
           return distance < nearest.distance
             ? { element, distance }
@@ -272,7 +280,7 @@ export function CustomCursor() {
       const target = document.elementFromPoint(cx, cy);
       const bgEl = target?.closest("[data-bg]") as HTMLElement | null;
       const baseColor = CURSOR_COLORS[bgEl?.dataset.bg ?? ""] ?? DEFAULT_COLOR;
-      const textElement = resolveTextElement(target, cx);
+      const textElement = resolveTextElement(target, cx, cy);
 
       const isOverText = updateTextReveal(textElement, cx, cy);
       setCursorColor(baseColor);

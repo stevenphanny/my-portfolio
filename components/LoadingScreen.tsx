@@ -112,6 +112,7 @@ export default function LoadingScreen() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
+          data-loading-screen
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-navy overflow-hidden"
         >
           <div className="flex flex-col items-center gap-3 select-none">
