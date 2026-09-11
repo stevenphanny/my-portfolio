@@ -129,6 +129,7 @@ export function AboutBio() {
               >
                 <motion.span
                   variants={quotePhraseVariants}
+                  data-cursor-text
                   className={`inline-block ${className ?? ""}`}
                 >
                   {text}

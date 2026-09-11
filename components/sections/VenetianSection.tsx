@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import {
   FEATURED_PROJECTS as PROJECTS,
@@ -21,19 +21,44 @@ const STRIP_COUNT = 7;
 const EASE = [0.25, 0, 0, 1] as [number, number, number, number];
 const SPRING_EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
-// Stacked (at-rest) positions for each card
-const STACK_POSITIONS = [
-  { x: 0, y: 0, rotate: 0, zIndex: 3 },
-  { x: 6, y: 14, rotate: 3, zIndex: 2 },
-  { x: -4, y: 22, rotate: -4, zIndex: 1 },
-];
+type DeckPhase = "stacked" | "fanned" | "dealing" | "ready";
 
-// Fanned-out positions
-const FAN_POSITIONS = [
-  { x: 0, y: 0, rotate: 0, zIndex: 3 },
-  { x: -260, y: 20, rotate: -10, zIndex: 2 },
-  { x: 260, y: 20, rotate: 10, zIndex: 1 },
-];
+const DECK_SEQUENCE = {
+  visibleThreshold: 0.75,
+  fanDelayMs: 700,
+  dealDelayMs: 1550,
+  readyDelayMs: 2850,
+} as const;
+
+const getDeckProgress = (index: number, total: number) =>
+  total <= 1 ? 0 : (index - (total - 1) / 2) / ((total - 1) / 2);
+
+const getStackPosition = (index: number, total: number) => ({
+  x: index === 0 ? 0 : (index % 2 === 0 ? -1 : 1) * Math.ceil(index / 2) * 5,
+  y: index * 10,
+  rotate: index === 0 ? 0 : (index % 2 === 0 ? -1 : 1) * 2.5,
+  zIndex: total - index,
+});
+
+const getFanPosition = (index: number, total: number) => {
+  const progress = getDeckProgress(index, total);
+  return {
+    x: progress * 105,
+    y: Math.abs(progress) * 18,
+    rotate: progress * 10,
+    zIndex: total - Math.round(Math.abs(progress) * (total - 1)),
+  };
+};
+
+const getDealtPosition = (index: number, total: number) => {
+  const progress = getDeckProgress(index, total);
+  return {
+    x: progress * 260,
+    y: Math.abs(progress) * 22,
+    rotate: progress * 4,
+    zIndex: total - index,
+  };
+};
 
 const headingVariants = {
   hidden: { clipPath: "inset(0 0 100% 0)", y: 10 },
@@ -325,33 +350,85 @@ function MobileCardList() {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Other projects — desktop card deck
+// Other projects — desktop deck that fans, then deals itself out
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function DesktopCardDeck() {
-  const [fanned, setFanned] = useState(false);
+  const deckRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const [phase, setPhase] = useState<DeckPhase>("stacked");
   const cardW = 440;
   const cardH = Math.round(cardW / (16 / 9.5));
+  const visiblePhase: DeckPhase = shouldReduceMotion ? "ready" : phase;
+  const cardsAreReady = visiblePhase === "ready";
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+
+    const deck = deckRef.current;
+    if (!deck) return;
+
+    let hasStarted = false;
+    const timers: number[] = [];
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (
+          hasStarted ||
+          !entry.isIntersecting ||
+          entry.intersectionRatio < DECK_SEQUENCE.visibleThreshold ||
+          document.querySelector("[data-loading-screen]")
+        ) {
+          return;
+        }
+
+        hasStarted = true;
+        observer.disconnect();
+        timers.push(
+          window.setTimeout(() => setPhase("fanned"), DECK_SEQUENCE.fanDelayMs),
+          window.setTimeout(() => setPhase("dealing"), DECK_SEQUENCE.dealDelayMs),
+          window.setTimeout(() => setPhase("ready"), DECK_SEQUENCE.readyDelayMs),
+        );
+      },
+      { threshold: DECK_SEQUENCE.visibleThreshold },
+    );
+
+    observer.observe(deck);
+
+    return () => {
+      observer.disconnect();
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, [shouldReduceMotion]);
+
+  const deckStatus = {
+    stacked: "Preparing the deck",
+    fanned: "Fanning the cards",
+    dealing: "Dealing the cards",
+    ready: "Hover a card",
+  }[visiblePhase];
 
   return (
     <>
       <p className="font-poppins text-xs tracking-[0.25em] uppercase text-cream/30 text-center mb-6">
-        {fanned ? "Hover a card" : "Hover to fan"}
+        {deckStatus}
       </p>
 
       <motion.div
+        ref={deckRef}
+        data-deck-phase={visiblePhase}
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.7, ease: EASE }}
         className="relative mx-auto"
         style={{ width: cardW, height: cardH + 30 }}
-        onMouseEnter={() => setFanned(true)}
-        onMouseLeave={() => setFanned(false)}
       >
         {OTHER_PROJECTS.map((p, i) => {
-          const stackPos = STACK_POSITIONS[i];
-          const fanPos = FAN_POSITIONS[i];
-          const pos = fanned ? fanPos : stackPos;
+          const pos =
+            visiblePhase === "stacked"
+              ? getStackPosition(i, OTHER_PROJECTS.length)
+              : visiblePhase === "fanned"
+                ? getFanPosition(i, OTHER_PROJECTS.length)
+                : getDealtPosition(i, OTHER_PROJECTS.length);
           const linkUrl = p.live && p.live !== "#" ? p.live : undefined;
 
           return (
@@ -365,14 +442,17 @@ function DesktopCardDeck() {
               }}
               transition={{
                 type: "spring",
-                stiffness: 200,
-                damping: 24,
-                delay: fanned
-                  ? i * 0.06
-                  : (OTHER_PROJECTS.length - 1 - i) * 0.04,
+                stiffness: visiblePhase === "fanned" ? 230 : 175,
+                damping: visiblePhase === "fanned" ? 22 : 20,
+                delay:
+                  visiblePhase === "fanned"
+                    ? i * 0.07
+                    : visiblePhase === "dealing"
+                      ? i * 0.14
+                      : 0,
               }}
               whileHover={
-                fanned ? { y: pos.y - 14, scale: 1.04, zIndex: 10 } : {}
+                cardsAreReady ? { y: pos.y - 14, scale: 1.04, zIndex: 10 } : {}
               }
               className="absolute cursor-pointer"
               style={{
@@ -418,7 +498,7 @@ function DesktopCardDeck() {
                   </div>
                 </div>
               </div>
-              {linkUrl && fanned && (
+              {linkUrl && cardsAreReady && (
                 <a
                   href={linkUrl}
                   target="_blank"
