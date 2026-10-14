@@ -69,18 +69,6 @@ body {
   height: 100%;
 }
 
-/* Landing TV static: tune from 0 (off) to about 0.35 (strong). */
-.intro-static {
-  --intro-static-strength: 0;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  mix-blend-mode: soft-light;
-  opacity: var(--intro-static-strength);
-}
-
 /* A clipped copy of hovered text paints only the glyph pixels above the cursor. */
 .cursor-text-overlay {
   position: fixed !important;
