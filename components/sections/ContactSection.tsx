@@ -1,7 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import posthog from "posthog-js";
 import { useEffect, useId, useState } from "react";
+
+const isPostHogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN && process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 const CONTACT_EMAIL = "stevenphan@outlook.com.au";
 const MAX_MESSAGE = 600;
@@ -22,7 +27,12 @@ function CopyEmailCard() {
   }, [copied]);
 
   function handleCopy() {
-    navigator.clipboard?.writeText(CONTACT_EMAIL).then(() => setCopied(true));
+    navigator.clipboard?.writeText(CONTACT_EMAIL).then(() => {
+      setCopied(true);
+      if (isPostHogConfigured) {
+        posthog.capture("contact_email_copied");
+      }
+    });
   }
 
   return (
@@ -130,8 +140,14 @@ export function ContactSection() {
       });
       if (!res.ok) throw res;
       setStatus("success");
+      if (isPostHogConfigured) {
+        posthog.capture("contact_form_submitted");
+      }
     } catch {
       setStatus("error");
+      if (isPostHogConfigured) {
+        posthog.capture("contact_form_submission_failed");
+      }
     }
   }
 

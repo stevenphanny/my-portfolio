@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useInView, useReducedMotion } from "framer-motion";
+import posthog from "posthog-js";
 import { useState, useEffect, useRef } from "react";
 import {
   FEATURED_PROJECTS as PROJECTS,
@@ -20,6 +21,18 @@ const IMAGE_FRAME_CLASS = {
 const STRIP_COUNT = 7;
 const EASE = [0.25, 0, 0, 1] as [number, number, number, number];
 const SPRING_EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
+const isPostHogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN && process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
+
+function trackProjectLink(projectId: string) {
+  if (isPostHogConfigured) {
+    posthog.capture("project_link_clicked", {
+      project_id: projectId,
+      link_type: "live",
+    });
+  }
+}
 
 type DeckPhase = "stacked" | "fanned" | "dealing" | "ready";
 
@@ -267,6 +280,7 @@ function VenetianCard({ project, index }: { project: Project; index: number }) {
             href={linkUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackProjectLink(project.id)}
             className="block"
           >
             {imageBlock}

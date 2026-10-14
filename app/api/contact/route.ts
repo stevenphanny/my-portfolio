@@ -1,7 +1,30 @@
+import { SeverityNumber } from "@opentelemetry/api-logs";
 import { Resend } from "resend";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { loggerProvider } from "@/instrumentation";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const contactLogger = loggerProvider?.getLogger("posthog-contact-route");
+
+function emitContactLog(
+  body: string,
+  severityNumber: SeverityNumber,
+  outcome: "rejected" | "failed" | "sent",
+) {
+  contactLogger?.emit({
+    body,
+    severityNumber,
+    attributes: { "contact.outcome": outcome },
+  });
+}
+
+function flushContactLogs() {
+  if (loggerProvider) {
+    after(async () => {
+      await loggerProvider.forceFlush();
+    });
+  }
+}
 
 // The email address that receives contact form submissions
 const TO_EMAIL = "stevenphan@outlook.com.au";
@@ -18,6 +41,12 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
+    emitContactLog(
+      "Contact request rejected: invalid JSON",
+      SeverityNumber.WARN,
+      "rejected",
+    );
+    flushContactLogs();
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
@@ -28,6 +57,12 @@ export async function POST(request: Request) {
     typeof email !== "string" || !email.trim() ||
     typeof message !== "string" || !message.trim()
   ) {
+    emitContactLog(
+      "Contact request rejected: missing fields",
+      SeverityNumber.WARN,
+      "rejected",
+    );
+    flushContactLogs();
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -41,8 +76,16 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error("Resend error:", error);
+    emitContactLog(
+      "Contact delivery failed",
+      SeverityNumber.ERROR,
+      "failed",
+    );
+    flushContactLogs();
     return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
   }
 
+  emitContactLog("Contact delivery sent", SeverityNumber.INFO, "sent");
+  flushContactLogs();
   return NextResponse.json({ success: true });
 }
