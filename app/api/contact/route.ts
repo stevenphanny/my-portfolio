@@ -3,7 +3,6 @@ import { Resend } from "resend";
 import { after, NextResponse } from "next/server";
 import { loggerProvider } from "@/instrumentation";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const contactLogger = loggerProvider?.getLogger("posthog-contact-route");
 
 function emitContactLog(
@@ -19,9 +18,10 @@ function emitContactLog(
 }
 
 function flushContactLogs() {
-  if (loggerProvider) {
+  const provider = loggerProvider;
+  if (provider) {
     after(async () => {
-      await loggerProvider.forceFlush();
+      await provider.forceFlush();
     });
   }
 }
@@ -66,6 +66,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // Created per request so builds without RESEND_API_KEY (e.g. CI) don't crash at import.
+  const resend = new Resend(process.env.RESEND_API_KEY);
   const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to: TO_EMAIL,
