@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { SectionViewTracker } from "@/components/SectionViewTracker";
 import { SECTION_REGISTRY } from "@/components/sections/registry";
 
 export const revalidate = 60;
@@ -9,6 +10,7 @@ export default function Home() {
       <Navbar
         sections={SECTION_REGISTRY.map(({ id, label }) => ({ id, label }))}
       />
+      <SectionViewTracker sectionIds={SECTION_REGISTRY.map(({ id }) => id)} />
 
       <div className="flex flex-col">
         {SECTION_REGISTRY.map(({ id, bgClass, fullBleed, Component }) => (

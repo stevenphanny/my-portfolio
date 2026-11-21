@@ -1,12 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
+import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import { useLenis } from "@/components/LenisProvider";
 import { SECTION_REGISTRY } from "@/components/sections/registry";
 
 // Delay matches loading screen exit: 5s timer + 0.7s overlay fade
 const NAV_DELAY = 5.7;
+const isPostHogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN && process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 const listVariants = {
   hidden: {},
@@ -84,6 +88,12 @@ export function Navbar({ sections }: NavbarProps) {
     setIsMenuOpen(false);
   };
 
+  const handleResumeDownload = () => {
+    if (isPostHogConfigured) {
+      posthog.capture("resume_downloaded");
+    }
+  };
+
   return (
     <>
       {/* ----- Small screens: burger + full-screen overlay ----- */}
@@ -131,6 +141,7 @@ export function Navbar({ sections }: NavbarProps) {
               <a
                 href="/StevenPhan_Resume.pdf"
                 download
+                onClick={handleResumeDownload}
                 className="block rounded-sm border border-navy px-3 py-2 font-poppins text-navy transition-colors hover:bg-navy hover:text-cream"
               >
                 Resume
@@ -176,6 +187,7 @@ export function Navbar({ sections }: NavbarProps) {
                 <a
                   href="/StevenPhan_Resume.pdf"
                   download
+                  onClick={handleResumeDownload}
                   className={`cursor-pointer px-3 py-1.5 font-poppins rounded-sm border transition-colors duration-[600ms] ${scheme === "cream" ? "border-cream text-cream hover:bg-cream hover:text-navy" : "border-navy text-navy hover:bg-navy hover:text-cream"}`}
                 >
                   Resume
