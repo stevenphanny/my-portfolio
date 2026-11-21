@@ -18,10 +18,8 @@ jobs:
     timeout-minutes: 15
 
     env:
-      # Public values (shipped to the browser anyway) needed to prerender pages.
-      # Set them under Settings → Secrets and variables → Actions → Variables.
-      NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
-      NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
+      # Sanity project ID / dataset defaults live in sanity/env.ts, so the build
+      # needs no repo variables or secrets.
       NEXT_TELEMETRY_DISABLED: 1
 
     steps:
